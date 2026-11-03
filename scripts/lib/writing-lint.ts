@@ -172,7 +172,9 @@ interface Sentence {
 
 function splitSentences(block: Block): Sentence[] {
   const out: Sentence[] = [];
-  const re = /[^.!?]+(?:[.!?]+["')\]]*|$)/g;
+  // A sentence ends at . ! or ? followed by whitespace or the end of the block,
+  // so names like urllib.parse.unquote or file.txt stay in one sentence.
+  const re = /(?:[^.!?]|[.!?]+(?!["')\]]*(?:\s|$)))+(?:[.!?]+["')\]]*|$)/g;
   for (const m of block.text.matchAll(re)) {
     const raw = m[0];
     const lead = raw.length - raw.trimStart().length;

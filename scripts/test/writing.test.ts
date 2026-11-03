@@ -119,6 +119,11 @@ describe('warnings', () => {
     assert.equal(warnings(page('It works. This one is a full sentence with words. Done.'), 'fragments').length, 0);
   });
 
+  test('dots inside names do not end a sentence', () => {
+    assert.equal(warnings(page('See [Python docs: urllib.parse.unquote](https://x) for details.'), 'fragments').length, 0);
+    assert.equal(warnings(page('Open trail.txt in an editor. Read README.txt first. Then run solve.py with Python.'), 'fragments').length, 0);
+  });
+
   test('list items are separate blocks', () => {
     assert.equal(warnings(page('- The first item.\n- The second item.\n- The third item.'), 'same-start').length, 0);
   });

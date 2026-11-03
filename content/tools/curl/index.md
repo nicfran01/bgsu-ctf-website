@@ -4,12 +4,12 @@ category: web
 summary: Send HTTP requests from the command line and see exactly what the server returns, including headers and cookies.
 platforms: [linux, macos, windows]
 officialUrl: https://curl.se
-tags: [http, cookies, cli, example]
+tags: [http, cookies, cli]
 ---
 
 ## What It Is
 
-curl is a command-line program that sends a request to a URL and prints the response. It speaks HTTP, HTTPS, FTP, and many other protocols, but in CTFs you will mostly use it for HTTP. Every header, cookie, and method is something you type, so you can send requests a browser would never send. This guide is the example tool page for the club site, and the commands are real.
+curl is a command-line program that sends a request to a URL and prints the response. It speaks HTTP, HTTPS, FTP, and many other protocols, but in CTFs you will mostly use it for HTTP. Every header, cookie, and method is something you type, so you can send requests a browser would never send.
 
 ## When To Use It
 
@@ -18,7 +18,7 @@ curl is a command-line program that sends a request to a URL and prints the resp
 - Scripting quick checks in a shell loop before writing a full Python script.
 - Sending requests through a proxy like Burp Suite so you can inspect them there.
 
-If you need to send many requests with logic between them, a Python script with `requests` is easier to read and change.
+If you need to send many requests with logic between them, a [Python](/tools/python) script with `requests` is easier to read and change.
 
 ## Installation
 
@@ -59,48 +59,66 @@ PowerShell 7 removed that alias, so `curl` works there. Using `curl.exe` works i
 
 ## Basic Usage
 
-The examples below run against the Cookie Monster example challenge on `http://localhost:1337`.
+The examples below use the web challenges from the BGSU CTF Halloween 2026 event, which are still online.
 
-Show the response headers along with the body:
+Fetch a page and search the HTML (this solves [Trick or Source](/challenges/trick-or-source)):
 
 ```console
-$ curl -i http://localhost:1337/
-HTTP/1.1 200 OK
-Server: Werkzeug/3.1.9 Python/3.14.7
-Content-Type: text/html; charset=utf-8
-Content-Length: 43
-Set-Cookie: session=eyJ1c2VyIjogImd1ZXN0IiwgInJvbGUiOiAiZ3Vlc3QifQ==; Path=/
-
-Hello guest. Only admins can see the flag.
+$ curl -s https://happy-halloween-easy-challenge.vercel.app | grep 'BOO{'
+    <!-- 👻 Boo! The ghost's secret message: BOO{v13w_s0urc3_1f_y0u_d4r3} -->
 ```
 
-Show the request curl sent and the response headers (lines starting with `>` are sent, `<` are received):
+Show the response headers, including any cookie the server sets (`-i`):
 
 ```console
-$ curl -v http://localhost:1337/
-> GET / HTTP/1.1
-> Host: localhost:1337
+$ curl -s -i "https://happy-halloween-medium-challenge.vercel.app/api/enter?name=Ichabod"
+HTTP/2 302
+cache-control: no-store, max-age=0
+content-type: text/html; charset=utf-8
+location: /crypt
+set-cookie: guestlist_session=eyJuYW1lIjoiSWNoYWJvZCIsInJvbGUiOiJndWVzdCIs...; Path=/; Max-Age=86400; SameSite=Lax
+```
+
+Show the request curl sends (`-v`). Lines starting with `>` are sent, and `<` are received:
+
+```console
+$ curl -s -v -o /dev/null https://happy-halloween-medium-challenge.vercel.app/crypt
+> GET /crypt HTTP/2
+> Host: happy-halloween-medium-challenge.vercel.app
 > User-Agent: curl/8.10.1
 > Accept: */*
->
-< HTTP/1.1 200 OK
-< Set-Cookie: session=eyJ1c2VyIjogImd1ZXN0IiwgInJvbGUiOiAiZ3Vlc3QifQ==; Path=/
 ```
 
-Send a cookie, or save cookies to a file and send them back on the next request:
+Send a cookie you built yourself (`-b`). This is the solve for [The Haunted Guestlist](/challenges/the-haunted-guestlist):
 
-```bash
-curl -b 'session=eyJ1c2VyIjogImd1ZXN0IiwgInJvbGUiOiAiYWRtaW4ifQ==' http://localhost:1337/
-curl -c cookies.txt http://localhost:1337/    # save cookies the server sets
-curl -b cookies.txt http://localhost:1337/    # send them back
+```console
+$ curl -s -b "guestlist_session=$(printf '%s' '{"name":"Ichabod","role":"reaper"}' | base64)" \
+    https://happy-halloween-medium-challenge.vercel.app/crypt | grep -o 'BOO{[^}]*}'
+BOO{gr4v3_r0bb1ng_th3_c00k13_j4r}
 ```
 
-Send a form POST, JSON, and custom headers:
+Save the cookies a server sets and send them back on the next request:
 
 ```bash
-curl -d 'username=admin&password=hunter2' http://localhost:1337/login
-curl -H 'Content-Type: application/json' -d '{"username": "admin"}' http://localhost:1337/api/login
-curl -H 'X-Forwarded-For: 127.0.0.1' http://localhost:1337/
+curl -c cookies.txt "https://happy-halloween-medium-challenge.vercel.app/api/enter?name=Ichabod"
+curl -b cookies.txt https://happy-halloween-medium-challenge.vercel.app/crypt
+```
+
+Print only the status code, for example to check which IDs exist on an API:
+
+```console
+$ curl -s -o /dev/null -w '%{http_code}\n' "https://happy-halloween-hard-challenge.vercel.app/api/record?id=1051"
+404
+$ curl -s -o /dev/null -w '%{http_code}\n' "https://happy-halloween-hard-challenge.vercel.app/api/record?id=1052"
+200
+```
+
+Send form data, JSON, and custom headers:
+
+```bash
+curl -d 'username=admin&password=hunter2' https://target.example/login
+curl -H 'Content-Type: application/json' -d '{"username": "admin"}' https://target.example/api/login
+curl -H 'X-Forwarded-For: 127.0.0.1' https://target.example/
 ```
 
 Other flags you will use often:
@@ -115,20 +133,13 @@ Other flags you will use often:
 | `-x http://127.0.0.1:8080` | Send the request through a proxy such as Burp Suite. |
 | `-k` | Skip TLS certificate checks. Only use it on challenge servers. |
 
-Print only the status code, for example to check whether a path exists:
-
-```console
-$ curl -s -o /dev/null -w '%{http_code}\n' http://localhost:1337/nope
-404
-```
-
 ## Common Pitfalls
 
-- **Unquoted URLs in the shell.** `&` in a query string ends the command in bash and zsh. Wrap URLs in single quotes: `curl 'http://host/?a=1&b=2'`.
+- **Unquoted URLs in the shell.** `&` in a query string ends the command in bash and zsh, and `?` can be treated as a wildcard. Wrap URLs in single quotes: `curl 'http://host/?a=1&b=2'`.
 - **The PowerShell alias.** In Windows PowerShell 5.1, `curl` is `Invoke-WebRequest` and rejects flags like `-i`. Use `curl.exe`.
 - **Quotes on Windows.** `cmd.exe` does not treat single quotes as quotes. Use double quotes there and escape inner double quotes with a backslash.
 - **`-d` changes the request.** It sets the method to POST and the content type to `application/x-www-form-urlencoded`. Add `-H 'Content-Type: application/json'` when sending JSON.
-- **Redirects look like empty pages.** A `302` with no body means the server wants you somewhere else. Add `-L` or read the `Location` header with `-i`.
+- **Redirects look like empty pages.** A `302` with no body means the server wants you somewhere else. Add `-L` or read the `location` header with `-i`.
 - **Trailing newlines.** `echo` adds a newline, which changes Base64 output and hashes. Use `printf '%s'` when building values for `-b` or `-d`.
 
 ## References

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 600" width="720" height="600" role="img" aria-labelledby="t">
+  <title id="t">Two circles: 1169 feet around the house and 1414 feet around the rock. They cross at two points, and the northern one matches the photo.</title>
+  <style>
+    text { font-family: 'IBM Plex Sans', system-ui, sans-serif; fill: #e6edf3; font-size: 15px; }
+    .muted { fill: #9fb0bd; font-size: 13px; }
+    .ring { fill: none; stroke-width: 2; }
+  </style>
+  <rect width="720" height="600" fill="#061721"/>
+  <circle class="ring" cx="469.3" cy="260.4" r="198.7" stroke="#90caf9"/>
+  <circle class="ring" cx="218.5" cy="351.2" r="240.4" stroke="#a5d6a7"/>
+  <line x1="469.3" y1="260.4" x2="317.5" y2="132.2" stroke="#90caf9" stroke-dasharray="5 4"/>
+  <line x1="218.5" y1="351.2" x2="317.5" y2="132.2" stroke="#a5d6a7" stroke-dasharray="5 4"/>
+  <circle cx="469.3" cy="260.4" r="6" fill="#90caf9"/>
+  <text x="479.3" y="265.4">House</text>
+  <circle cx="218.5" cy="351.2" r="6" fill="#a5d6a7"/>
+  <text x="176.5" y="356.2">Rock</text>
+  <circle cx="317.5" cy="132.2" r="8" fill="#fb9c16"/>
+  <text x="329.5" y="124.2">Photo spot</text>
+  <text class="muted" x="329.5" y="142.2">32°25'46"N 110°45'07"W</text>
+  <circle cx="434.7" cy="456.2" r="6" fill="none" stroke="#9fb0bd" stroke-width="2"/>
+  <text class="muted" x="446.7" y="461.2">Second crossing (ruled out)</text>
+  <text class="muted" x="401.4" y="212.3">1169 ft</text>
+  <text class="muted" x="206.0" y="241.7">1414 ft</text>
+  <path d="M680 70 L680 30 M672 42 L680 30 L688 42" stroke="#e6edf3" stroke-width="2" fill="none"/>
+  <text x="674" y="88">N</text>
+</svg>
