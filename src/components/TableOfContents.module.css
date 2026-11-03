@@ -1,0 +1,42 @@
+.toc {
+  font-size: var(--text-sm);
+}
+
+.summary {
+  cursor: pointer;
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+  color: var(--color-text);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-left: 1px solid var(--color-border);
+}
+
+.sub .link {
+  padding-left: var(--space-5);
+  font-size: var(--text-xs);
+}
+
+.link {
+  display: block;
+  margin-left: -1px;
+  padding: var(--space-1) var(--space-3);
+  border-left: 2px solid transparent;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  line-height: 1.4;
+}
+
+.link:hover {
+  color: var(--color-text);
+}
+
+.active,
+.active:hover {
+  color: var(--color-accent);
+  border-left-color: var(--color-accent);
+}

@@ -1,0 +1,73 @@
+/*
+  Syntax colors for highlight.js, tuned for the logo palette. Every color
+  passes 4.5:1 against --color-code-bg (#030f17).
+*/
+.hljs {
+  color: #e6edf3;
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: #8da2b2;
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-meta .hljs-keyword,
+.hljs-doctag {
+  color: #fb9c16;
+}
+
+.hljs-string,
+.hljs-regexp,
+.hljs-addition,
+.hljs-meta .hljs-string {
+  color: #a5d6a7;
+}
+
+.hljs-number,
+.hljs-literal,
+.hljs-symbol,
+.hljs-bullet {
+  color: #ffcc80;
+}
+
+.hljs-title,
+.hljs-title.function_,
+.hljs-section,
+.hljs-name {
+  color: #90caf9;
+}
+
+.hljs-built_in,
+.hljs-type,
+.hljs-title.class_ {
+  color: #80deea;
+}
+
+.hljs-attr,
+.hljs-attribute,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-params {
+  color: #cfd8dc;
+}
+
+.hljs-meta,
+.hljs-selector-id,
+.hljs-selector-class {
+  color: #b0bec5;
+}
+
+.hljs-deletion {
+  color: #ff8a80;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: 600;
+}

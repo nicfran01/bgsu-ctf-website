@@ -1,0 +1,34 @@
+# Runs on every pull request. Make "Writing and content check" a required
+# status check on main so a pull request cannot merge until it passes.
+# See "Block merges until the check passes" in README.md.
+name: Check content
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Writing and content check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Writing linter, frontmatter, and headings
+        run: npm run lint:content
+
+      - name: Tests
+        run: npm test
+
+      - name: Type check and build
+        run: npm run build

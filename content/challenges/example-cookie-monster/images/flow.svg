@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 260" width="720" height="260" role="img" aria-labelledby="t">
+  <title id="t">The browser sends the session cookie, and the server decodes it and checks the role without verifying a signature</title>
+  <style>
+    text { font-family: 'IBM Plex Sans', system-ui, sans-serif; fill: #e6edf3; }
+    .mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 13px; }
+    .label { font-size: 15px; font-weight: 600; }
+    .muted { fill: #9fb0bd; font-size: 13px; }
+    .box { fill: #0b2230; stroke: #5e7b90; stroke-width: 1.5; }
+    .arrow { stroke: #fb9c16; stroke-width: 2; fill: none; }
+    .warn { fill: #fb9c16; font-size: 13px; font-weight: 600; }
+  </style>
+  <defs>
+    <marker id="head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#fb9c16" />
+    </marker>
+  </defs>
+  <rect width="720" height="260" fill="#061721" />
+
+  <rect class="box" x="24" y="70" width="170" height="90" rx="6" />
+  <text class="label" x="109" y="110" text-anchor="middle">Browser</text>
+  <text class="muted" x="109" y="132" text-anchor="middle">cookie is editable</text>
+
+  <path class="arrow" d="M194 115 H 420" marker-end="url(#head)" />
+  <text class="mono" x="307" y="100" text-anchor="middle">GET /</text>
+  <text class="mono" x="307" y="140" text-anchor="middle">Cookie: session=eyJ1c2Vy...</text>
+
+  <rect class="box" x="424" y="30" width="272" height="200" rx="6" />
+  <text class="label" x="560" y="62" text-anchor="middle">Flask server</text>
+  <text class="mono" x="444" y="98">1. base64.b64decode()</text>
+  <text class="mono" x="444" y="124">2. json.loads()</text>
+  <text class="mono" x="444" y="150">3. role == "admin"?</text>
+  <text class="warn" x="444" y="190">No signature check</text>
+  <text class="muted" x="444" y="210">any decoded value is trusted</text>
+</svg>

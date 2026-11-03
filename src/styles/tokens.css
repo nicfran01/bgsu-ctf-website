@@ -1,0 +1,54 @@
+/*
+  Design tokens. Every color here was sampled from BGSU_CTF_Logo_1.png or
+  derived from those samples. Contrast ratios are against --color-bg.
+*/
+:root {
+  color-scheme: dark;
+
+  /* Logo background, the most common pixel in the file. */
+  --color-bg: #061721;
+  --color-surface: #0b2230;
+  --color-surface-raised: #0f2a3b;
+  --color-border: #1f3a4b;
+  /* Form control outlines need 3:1 against the surface (3.66:1). */
+  --color-border-strong: #5e7b90;
+
+  --color-text: #e6edf3; /* 15.4:1 */
+  --color-text-muted: #9fb0bd; /* 8.2:1 */
+
+  /* Logo gradient, light to deep. */
+  --color-accent-light: #ffb01f; /* 10.0:1, hover */
+  --color-accent: #fb9c16; /* 8.6:1, links, active states, buttons */
+  --color-accent-strong: #f85d0c; /* 5.7:1, borders and large text */
+  --color-accent-deep: #e43609; /* 4.2:1, decoration only, never text */
+  --color-on-accent: #061721; /* text on an orange fill, 8.6:1 */
+  --color-accent-tint: rgb(251 156 22 / 0.1);
+  --color-code-bg: #030f17;
+
+  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --text-xs: 0.8125rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  --radius-sm: 4px;
+  --radius: 6px;
+
+  --page-width: 72rem;
+  --prose-width: 72ch;
+  --header-height: 4rem;
+}
