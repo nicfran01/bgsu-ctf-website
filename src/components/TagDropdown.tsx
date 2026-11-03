@@ -48,10 +48,12 @@ export function TagDropdown({ legend, options, selected, onToggle, onClear }: Ta
       ref={rootRef}
       onBlur={(e) => {
         // Close when keyboard focus moves to another element outside the dropdown.
-        // relatedTarget is null when focus is only being cleared, such as when
-        // clicking an option's label, so that case keeps the panel open.
+        // Ignore focus that goes nowhere (null) or to a container around the
+        // dropdown: Safari moves focus to the nearest focusable ancestor (the
+        // page's <main>) when you click plain text, which is not leaving.
         const next = e.relatedTarget as Node | null;
-        if (open && next && !rootRef.current?.contains(next)) setOpen(false);
+        const root = rootRef.current;
+        if (open && root && next && !root.contains(next) && !next.contains(root)) setOpen(false);
       }}
       onKeyDown={(e) => {
         if (e.key === 'Escape' && open) {
@@ -80,7 +82,17 @@ export function TagDropdown({ legend, options, selected, onToggle, onClear }: Ta
       </button>
 
       {open && (
-        <div id={panelId} className={styles.panel} role="group" aria-labelledby={labelId}>
+        <div
+          id={panelId}
+          className={styles.panel}
+          role="group"
+          aria-labelledby={labelId}
+          onMouseDown={(e) => {
+            // Keep focus where it is when clicking an option, so no browser moves
+            // it elsewhere mid-click. The click itself still toggles the checkbox.
+            if (!(e.target instanceof HTMLInputElement && e.target.type === 'search')) e.preventDefault();
+          }}
+        >
           <input
             ref={searchRef}
             type="search"
