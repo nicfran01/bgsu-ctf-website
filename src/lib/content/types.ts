@@ -55,6 +55,12 @@ export interface Tool extends ToolFrontmatter {
   body: string;
 }
 
+/** A challenge without its markdown body, as the list pages load it. */
+export type ChallengeSummary = Omit<Challenge, 'body'>;
+
+/** A tool without its markdown body, as the list pages load it. */
+export type ToolSummary = Omit<Tool, 'body'>;
+
 export interface ContentIssue {
   /** Repo-relative path of the file with the problem. */
   file: string;

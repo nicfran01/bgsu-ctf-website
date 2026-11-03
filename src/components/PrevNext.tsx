@@ -1,10 +1,10 @@
 import { Link } from 'react-router';
-import type { Challenge } from '../lib/content/types';
+import type { ChallengeSummary } from '../lib/content/types';
 import { formatDate } from '../lib/format';
 import styles from './PrevNext.module.css';
 
 /** Links to the previous (older) and next (newer) write-ups by date. */
-export function PrevNext({ older, newer }: { older: Challenge | undefined; newer: Challenge | undefined }) {
+export function PrevNext({ older, newer }: { older: ChallengeSummary | undefined; newer: ChallengeSummary | undefined }) {
   if (!older && !newer) return null;
   return (
     <nav aria-label="Other write-ups" className={styles.nav}>

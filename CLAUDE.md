@@ -36,10 +36,12 @@ content/
 
 ## How content is loaded
 
-- `src/lib/content/load.ts` discovers files with `import.meta.glob(..., { query: '?content' })`.
+- `src/lib/content/load.ts` discovers files with `import.meta.glob(..., { query: '?content' })`. Those modules carry frontmatter only (`ChallengeSummary`, `ToolSummary`), never the markdown body.
+- Markdown bodies load on demand through `useMarkdownBody`, which imports each file with the `?body` query. Each write-up becomes its own small chunk, so the main bundle does not grow with the amount of content. Never import bodies eagerly.
 - `scripts/vite-content-plugin.ts` answers those imports: it parses frontmatter with `yaml` at build time and validates with `src/lib/content/validate.ts`, so the YAML parser never ships to the browser. It also validates the whole `content/` tree in `buildStart` and fails the build with file and field names.
 - `src/lib/content/{types,frontmatter,validate,headings,paths}.ts` are shared by the browser, the Vite plugin, the linter, and the scaffold scripts. Keep them free of DOM, Node, and `import.meta` APIs.
 - Pages that render markdown (`ChallengeDetailPage`, `ToolDetailPage`, `AboutPage`) are lazy-loaded so list pages stay small.
+- The Tag filter on the Challenges page is a dropdown (`TagDropdown`) so a long tag list stays out of the way. Category and difficulty stay as buttons.
 - Routing is HashRouter. In-page section links are `#/<route>#<heading-id>`; `useHashScroll` handles them.
 
 ## Standard write-up structure

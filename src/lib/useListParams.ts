@@ -55,6 +55,8 @@ export function useListParams<K extends string, S extends string>(filterKeys: re
     [update],
   );
 
+  const clear = useCallback((key: K) => update((p) => p.delete(key)), [update]);
+
   const reset = useCallback(
     () =>
       update((p) => {
@@ -66,5 +68,5 @@ export function useListParams<K extends string, S extends string>(filterKeys: re
 
   const isFiltered = query !== '' || filterKeys.some((k) => filters[k].length > 0);
 
-  return { query, sort, filters, setQuery, setSort, toggle, reset, isFiltered };
+  return { query, sort, filters, setQuery, setSort, toggle, clear, reset, isFiltered };
 }

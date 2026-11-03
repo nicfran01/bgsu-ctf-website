@@ -8,6 +8,7 @@ import { TableOfContents } from '../components/TableOfContents';
 import { challenges } from '../lib/content/load';
 import { formatDate } from '../lib/format';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
+import { useMarkdownBody } from '../lib/content/useMarkdownBody';
 import { useHashScroll } from '../lib/useHashScroll';
 import { NotFoundPage } from './NotFoundPage';
 import styles from './DetailPage.module.css';
@@ -18,7 +19,9 @@ export function ChallengeDetailPage() {
   const challenge = challenges[index];
   const contentRef = useRef<HTMLDivElement>(null);
   useDocumentTitle(challenge?.title);
-  useHashScroll(challenge?.slug);
+  const body = useMarkdownBody(challenge?.sourcePath);
+  // Wait for the body, so #section links have headings to scroll to.
+  useHashScroll(body === null ? undefined : challenge?.slug);
 
   if (!challenge) return <NotFoundPage />;
 
@@ -48,10 +51,14 @@ export function ChallengeDetailPage() {
       <div className={styles.layout}>
         <aside className={styles.sidebar}>
           <ChallengeMeta challenge={challenge} />
-          <TableOfContents contentRef={contentRef} routePath={routePath} deps={challenge.slug} />
+          <TableOfContents contentRef={contentRef} routePath={routePath} deps={body === null ? null : challenge.slug} />
         </aside>
         <article className={styles.article} ref={contentRef}>
-          <Markdown markdown={challenge.body} sourcePath={challenge.sourcePath} routePath={routePath} />
+          {body === null ? (
+            <p className={styles.loading} aria-busy="true">Loading...</p>
+          ) : (
+            <Markdown markdown={body} sourcePath={challenge.sourcePath} routePath={routePath} />
+          )}
           <PrevNext older={older} newer={newer} />
         </article>
       </div>

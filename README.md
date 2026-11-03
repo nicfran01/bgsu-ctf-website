@@ -41,7 +41,7 @@ The block between the two `---` lines at the top of `writeup.md` describes the c
 | Field | Required | What to put |
 | --- | --- | --- |
 | `title` | yes | Challenge name as the event listed it |
-| `category` | yes | One of `web`, `crypto`, `forensics`, `pwn`, `reverse`, `osint`, `misc` |
+| `category` | yes | One of `web`, `crypto`, `forensics`, `network`, `pwn`, `reverse`, `osint`, `misc` |
 | `difficulty` | yes | `easy`, `medium`, or `hard` |
 | `date` | yes | `YYYY-MM-DD`. The home page shows the newest write-ups first |
 | `author` | yes | Your name, as you want it shown |
@@ -96,7 +96,7 @@ This creates `content/tools/nmap/index.md` and an `images/` folder. Frontmatter 
 | Field | Required | What to put |
 | --- | --- | --- |
 | `name` | yes | Tool name |
-| `category` | yes | One of `recon`, `web`, `crypto`, `forensics`, `reverse`, `pwn`, `general` |
+| `category` | yes | One of `recon`, `web`, `crypto`, `forensics`, `network`, `reverse`, `pwn`, `general` |
 | `summary` | yes | One sentence for the tool card |
 | `platforms` | yes | Any of `linux`, `macos`, `windows`, `web`, as a list |
 | `officialUrl` | no | The tool's home page |

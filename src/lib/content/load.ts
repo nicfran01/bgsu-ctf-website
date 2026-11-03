@@ -1,16 +1,17 @@
 // Loads every challenge, tool, and the About page at build time with
 // import.meta.glob. Adding a folder under content/ is enough for it to show up.
 // The "?content" query is handled by scripts/vite-content-plugin.ts, which
-// parses and validates each file before it reaches the browser.
+// parses and validates each file before it reaches the browser. Markdown
+// bodies are loaded separately, on demand, by useMarkdownBody.
 
-import type { Challenge, ContentIssue, LoadedEntry, Tool } from './types';
+import type { ChallengeSummary, ContentIssue, LoadedEntry, ToolSummary } from './types';
 
-const challengeModules = import.meta.glob<LoadedEntry<Challenge>>('/content/challenges/*/writeup.md', {
+const challengeModules = import.meta.glob<LoadedEntry<ChallengeSummary>>('/content/challenges/*/writeup.md', {
   query: '?content',
   import: 'default',
   eager: true,
 });
-const toolModules = import.meta.glob<LoadedEntry<Tool>>('/content/tools/*/index.md', {
+const toolModules = import.meta.glob<LoadedEntry<ToolSummary>>('/content/tools/*/index.md', {
   query: '?content',
   import: 'default',
   eager: true,
@@ -26,12 +27,12 @@ const items = <T,>(modules: Record<string, LoadedEntry<T>>): T[] =>
   Object.values(modules).flatMap((m) => (m.item === null ? [] : [m.item]));
 
 /** Newest first. */
-export const challenges: Challenge[] = items(challengeModules).sort(
+export const challenges: ChallengeSummary[] = items(challengeModules).sort(
   (a, b) => b.date.localeCompare(a.date) || a.title.localeCompare(b.title),
 );
 
 /** A to Z by name. */
-export const tools: Tool[] = items(toolModules).sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+export const tools: ToolSummary[] = items(toolModules).sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
 
 export const aboutMarkdown: string = items(aboutModules)[0] ?? '';
 

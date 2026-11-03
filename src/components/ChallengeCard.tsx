@@ -1,10 +1,10 @@
 import { Link } from 'react-router';
-import type { Challenge } from '../lib/content/types';
+import type { ChallengeSummary } from '../lib/content/types';
 import { formatDate } from '../lib/format';
 import { CategoryBadge, DifficultyBadge, TagList } from './Badge';
 import styles from './Card.module.css';
 
-export function ChallengeCard({ challenge, headingLevel = 2 }: { challenge: Challenge; headingLevel?: 2 | 3 }) {
+export function ChallengeCard({ challenge, headingLevel = 2 }: { challenge: ChallengeSummary; headingLevel?: 2 | 3 }) {
   const Heading = headingLevel === 2 ? 'h2' : 'h3';
   return (
     <article className={styles.card}>

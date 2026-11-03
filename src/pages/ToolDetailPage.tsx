@@ -7,6 +7,7 @@ import { TableOfContents } from '../components/TableOfContents';
 import { label } from '../content.config';
 import { tools } from '../lib/content/load';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
+import { useMarkdownBody } from '../lib/content/useMarkdownBody';
 import { useHashScroll } from '../lib/useHashScroll';
 import { NotFoundPage } from './NotFoundPage';
 import styles from './DetailPage.module.css';
@@ -16,7 +17,9 @@ export function ToolDetailPage() {
   const tool = tools.find((t) => t.slug === slug);
   const contentRef = useRef<HTMLDivElement>(null);
   useDocumentTitle(tool?.name);
-  useHashScroll(tool?.slug);
+  const body = useMarkdownBody(tool?.sourcePath);
+  // Wait for the body, so #section links have headings to scroll to.
+  useHashScroll(body === null ? undefined : tool?.slug);
 
   if (!tool) return <NotFoundPage />;
   const routePath = `/tools/${tool.slug}`;
@@ -67,10 +70,14 @@ export function ToolDetailPage() {
               </div>
             )}
           </section>
-          <TableOfContents contentRef={contentRef} routePath={routePath} deps={tool.slug} />
+          <TableOfContents contentRef={contentRef} routePath={routePath} deps={body === null ? null : tool.slug} />
         </aside>
         <article className={styles.article} ref={contentRef}>
-          <Markdown markdown={tool.body} sourcePath={tool.sourcePath} routePath={routePath} />
+          {body === null ? (
+            <p className={styles.loading} aria-busy="true">Loading...</p>
+          ) : (
+            <Markdown markdown={body} sourcePath={tool.sourcePath} routePath={routePath} />
+          )}
         </article>
       </div>
     </div>

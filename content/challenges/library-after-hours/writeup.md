@@ -1,6 +1,6 @@
 ---
 title: "Library After Hours"
-category: forensics
+category: network
 difficulty: hard
 date: 2026-10-28
 ctf: BGSU CTF Halloween 2026

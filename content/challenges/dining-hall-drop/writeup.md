@@ -1,6 +1,6 @@
 ---
 title: "Dining Hall Drop"
-category: forensics
+category: network
 difficulty: easy
 date: 2026-10-28
 ctf: BGSU CTF Halloween 2026

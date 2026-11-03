@@ -1,11 +1,11 @@
-import type { Challenge } from '../lib/content/types';
+import type { ChallengeSummary } from '../lib/content/types';
 import { formatBytes, formatDate } from '../lib/format';
 import { challengeFilesUrl, repoFileUrl } from '../lib/github';
 import { isRepoConfigured } from '../site.config';
 import { CategoryBadge, DifficultyBadge, TagList } from './Badge';
 import styles from './Sidebar.module.css';
 
-export function ChallengeMeta({ challenge }: { challenge: Challenge }) {
+export function ChallengeMeta({ challenge }: { challenge: ChallengeSummary }) {
   const hasFiles = challenge.files.length > 0;
   const filesDir = `content/challenges/${challenge.slug}/files`;
 

@@ -1,11 +1,11 @@
 // Vite plugin for the content/ folder.
 //
-// The site discovers content with import.meta.glob and a custom "?content"
-// query, for example
-//   import.meta.glob('/content/challenges/*/writeup.md', { query: '?content', ... })
-// This plugin answers those imports: it reads the markdown file, parses and
-// validates the frontmatter, and returns the result as JSON. Parsing happens
-// here at build time, so the YAML parser is never shipped to the browser.
+// The site discovers content with import.meta.glob and two custom queries:
+//   ?content  the parsed, validated frontmatter (no markdown body), loaded
+//             eagerly by the list pages
+//   ?body     just the markdown body, loaded on demand by a detail page
+// Splitting them keeps every write-up's text out of the main bundle. Parsing
+// happens here at build time, so the YAML parser is never shipped to the browser.
 //
 // It also validates the whole content/ folder when a build starts. Any problem
 // stops `vite build` with the file and field name. In the dev server the same
@@ -15,10 +15,18 @@ import { readFileSync } from 'node:fs';
 import { relative, resolve, sep } from 'node:path';
 import type { Plugin, ViteDevServer } from 'vite';
 import { formatIssues, type LoadedEntry } from '../src/lib/content/types.ts';
+import { parseMarkdown } from '../src/lib/content/frontmatter.ts';
 import { loadChallenge, loadPage, loadTool, type ValidationContext } from '../src/lib/content/validate.ts';
 import { readContentTree, validateContentTree } from './lib/content-fs.ts';
 
 const QUERY = '?content';
+const BODY_QUERY = '?body';
+
+function withoutBody<T extends { body: string }>(item: T | null): Omit<T, 'body'> | null {
+  if (!item) return null;
+  const { body: _body, ...rest } = item;
+  return rest;
+}
 
 export function contentPlugin(): Plugin {
   let root = process.cwd();
@@ -51,6 +59,10 @@ export function contentPlugin(): Plugin {
     },
 
     load(id) {
+      if (id.endsWith(BODY_QUERY)) {
+        const file = id.slice(0, -BODY_QUERY.length);
+        return `export default ${JSON.stringify(parseMarkdown(readFileSync(file, 'utf8')).body)};`;
+      }
       if (!id.endsWith(QUERY)) return undefined;
       const file = id.slice(0, -QUERY.length);
       const repoPath = relative(root, file).split(sep).join('/');
@@ -59,10 +71,10 @@ export function contentPlugin(): Plugin {
       let entry: LoadedEntry<unknown>;
       if (/^content\/challenges\/[^/]+\/writeup\.md$/.test(repoPath)) {
         const r = loadChallenge(source, context());
-        entry = { item: r.challenge, issues: r.issues };
+        entry = { item: withoutBody(r.challenge), issues: r.issues };
       } else if (/^content\/tools\/[^/]+\/index\.md$/.test(repoPath)) {
         const r = loadTool(source, context());
-        entry = { item: r.tool, issues: r.issues };
+        entry = { item: withoutBody(r.tool), issues: r.issues };
       } else if (repoPath === 'content/about.md') {
         const r = loadPage(source, context());
         entry = { item: r.body, issues: r.issues };
@@ -84,7 +96,7 @@ export function contentPlugin(): Plugin {
         // Images and files/ folders feed into the checks, so reload every content module.
         ctx = undefined;
         for (const mod of devServer.moduleGraph.idToModuleMap.values()) {
-          if (mod.id?.endsWith(QUERY)) devServer.moduleGraph.invalidateModule(mod);
+          if (mod.id?.endsWith(QUERY) || mod.id?.endsWith(BODY_QUERY)) devServer.moduleGraph.invalidateModule(mod);
         }
         if (reportToOverlay().length === 0) devServer.ws.send({ type: 'full-reload' });
       };

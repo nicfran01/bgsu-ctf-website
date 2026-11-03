@@ -1,6 +1,6 @@
 ---
 title: "Whispers in the Wire"
-category: forensics
+category: network
 difficulty: medium
 date: 2026-10-28
 ctf: BGSU CTF Halloween 2026

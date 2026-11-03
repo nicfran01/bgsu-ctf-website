@@ -1,6 +1,6 @@
 ---
 name: Wireshark
-category: forensics
+category: network
 summary: The standard packet analyzer for opening capture files, filtering traffic, following streams, and decrypting TLS when you have the key.
 platforms: [linux, macos, windows]
 officialUrl: https://www.wireshark.org/

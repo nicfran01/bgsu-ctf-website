@@ -1,10 +1,10 @@
 import { Link } from 'react-router';
 import { label } from '../content.config';
-import type { Tool } from '../lib/content/types';
+import type { ToolSummary } from '../lib/content/types';
 import { CategoryBadge, TagList } from './Badge';
 import styles from './Card.module.css';
 
-export function ToolCard({ tool }: { tool: Tool }) {
+export function ToolCard({ tool }: { tool: ToolSummary }) {
   return (
     <article className={styles.card}>
       <div className={styles.badges}>

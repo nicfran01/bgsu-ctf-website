@@ -1,6 +1,6 @@
 import Fuse, { type IFuseOptions } from 'fuse.js';
 import { DIFFICULTIES } from '../content.config';
-import type { Challenge, Tool } from './content/types';
+import type { ChallengeSummary, ToolSummary } from './content/types';
 
 export const CHALLENGE_SORTS = ['newest', 'oldest', 'title', 'difficulty'] as const;
 export type ChallengeSort = (typeof CHALLENGE_SORTS)[number];
@@ -14,7 +14,7 @@ export const SORT_LABELS: Record<ChallengeSort, string> = {
 
 const FUSE_BASE = { threshold: 0.3, ignoreLocation: true } as const;
 
-const challengeFuseOptions: IFuseOptions<Challenge> = {
+const challengeFuseOptions: IFuseOptions<ChallengeSummary> = {
   ...FUSE_BASE,
   keys: [
     { name: 'title', weight: 2 },
@@ -26,7 +26,7 @@ const challengeFuseOptions: IFuseOptions<Challenge> = {
   ],
 };
 
-const toolFuseOptions: IFuseOptions<Tool> = {
+const toolFuseOptions: IFuseOptions<ToolSummary> = {
   ...FUSE_BASE,
   keys: [
     { name: 'name', weight: 2 },
@@ -36,11 +36,11 @@ const toolFuseOptions: IFuseOptions<Tool> = {
   ],
 };
 
-export function createChallengeIndex(items: Challenge[]) {
+export function createChallengeIndex(items: ChallengeSummary[]) {
   return new Fuse(items, challengeFuseOptions);
 }
 
-export function createToolIndex(items: Tool[]) {
+export function createToolIndex(items: ToolSummary[]) {
   return new Fuse(items, toolFuseOptions);
 }
 
@@ -59,21 +59,21 @@ export interface ChallengeFilters {
 }
 
 export function filterChallenges(
-  items: Challenge[],
-  index: Fuse<Challenge>,
+  items: ChallengeSummary[],
+  index: Fuse<ChallengeSummary>,
   query: string,
   filters: ChallengeFilters,
   sort: ChallengeSort,
-): Challenge[] {
+): ChallengeSummary[] {
   const result = search(items, index, query).filter(
     (c) => matches(filters.category, c.category) && matches(filters.difficulty, c.difficulty) && matchesAny(filters.tag, c.tags),
   );
   return sortChallenges(result, sort);
 }
 
-export function sortChallenges(items: Challenge[], sort: ChallengeSort): Challenge[] {
-  const newest = (a: Challenge, b: Challenge) => b.date.localeCompare(a.date) || a.title.localeCompare(b.title);
-  const rank = (c: Challenge) => DIFFICULTIES.indexOf(c.difficulty);
+export function sortChallenges(items: ChallengeSummary[], sort: ChallengeSort): ChallengeSummary[] {
+  const newest = (a: ChallengeSummary, b: ChallengeSummary) => b.date.localeCompare(a.date) || a.title.localeCompare(b.title);
+  const rank = (c: ChallengeSummary) => DIFFICULTIES.indexOf(c.difficulty);
   const sorted = [...items];
   switch (sort) {
     case 'oldest':
@@ -92,7 +92,7 @@ export interface ToolFilters {
   platform: string[];
 }
 
-export function filterTools(items: Tool[], index: Fuse<Tool>, query: string, filters: ToolFilters): Tool[] {
+export function filterTools(items: ToolSummary[], index: Fuse<ToolSummary>, query: string, filters: ToolFilters): ToolSummary[] {
   return search(items, index, query)
     .filter((t) => matches(filters.category, t.category) && matchesAny(filters.platform, t.platforms))
     .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
