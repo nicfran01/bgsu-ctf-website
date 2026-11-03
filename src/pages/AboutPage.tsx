@@ -10,8 +10,7 @@ export function AboutPage() {
   return (
     <div className="container page">
       <h1 className="page-title">About {siteConfig.clubName}</h1>
-      <p className="page-lead">{siteConfig.tagline}</p>
-      <div style={{ marginTop: 'var(--space-6)' }}>
+      <div style={{ marginTop: 'var(--space-5)' }}>
         <Markdown markdown={aboutMarkdown} sourcePath="content/about.md" routePath="/about" />
       </div>
     </div>

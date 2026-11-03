@@ -1,24 +1,25 @@
+A capture the flag (CTF) competition is a set of security challenges. Each challenge hides a short piece of text, called the flag, inside something like a vulnerable website, an encrypted message, a compiled program, or a packet capture. You find the flag by breaking the challenge, then submit it to the scoreboard for points.
+
 ## What We Do
 
-TODO: two or three sentences describing the club, written by an officer. Say what members do at meetings and which competitions the club enters.
+We are the cybersecurity club at Bowling Green State University, and our goal is to give BGSU students hands-on security experience. Each meeting covers a cybersecurity concept, and then members work through practice problems that use it. Outside of meetings, the club enters online CTF competitions and hosts events with food and prizes.
 
 ## Meetings
 
-- **When:** TODO: day and time
-- **Where:** TODO: building and room
-- **Online:** TODO: Discord or other chat link, if there is one
+- **When:** Every Wednesday, 6:00 PM
+- **Where:** Hayes Hall 118
 
 ## How To Join
 
-TODO: steps to join, such as signing up on the student organization site, joining the chat, or showing up to a meeting. Say whether any experience is required.
+Come to a meeting. There is no application or sign-up form, and you do not need any cybersecurity experience.
 
 ## Officers
 
-| Role | Name | Contact |
+| Role | Name | Email |
 | --- | --- | --- |
-| TODO: role | TODO: name | TODO: email or chat handle |
-| TODO: role | TODO: name | TODO: email or chat handle |
-
-## Contributing to This Site
-
-Write-ups and tool guides live in the `content/` folder of this site's GitHub repository. To add one, follow the steps in the repository's README and open a pull request. A check runs on every pull request and lists anything that needs fixing before an officer can merge it.
+| President | Nick Francisco | [nicfran@bgsu.edu](mailto:nicfran@bgsu.edu) |
+| Vice President | Dawson R Pelter | [dpelter@bgsu.edu](mailto:dpelter@bgsu.edu) |
+| Treasurer | Van Lauderback | [vlauder@bgsu.edu](mailto:vlauder@bgsu.edu) |
+| Secretary | Amanda Grace Hayner | [aghayne@bgsu.edu](mailto:aghayne@bgsu.edu) |
+| Officer | Brock M Rowe | [bmrowe@bgsu.edu](mailto:bmrowe@bgsu.edu) |
+| Officer | Austin Paul Opsomer | [opsomea@bgsu.edu](mailto:opsomea@bgsu.edu) |
