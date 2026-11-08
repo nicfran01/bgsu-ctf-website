@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { lintMarkdown, lintSource, type Finding } from '../lib/writing-lint.ts';
+import { lintJson, lintMarkdown, lintSource, type Finding } from '../lib/writing-lint.ts';
 
 const EM = '—';
 const EN = '–';
@@ -163,5 +163,35 @@ describe('source files', () => {
   test('dashes are errors anywhere in source, including code', () => {
     const f = lintSource('src/a.ts', `const x = 1; // ok\nconst y = a ${EM} b;`);
     assert.deepEqual(f.map((x) => [x.rule, x.line]), [['em dash', 2]]);
+  });
+});
+
+describe('JSON content', () => {
+  const json = (entries: unknown) => lintJson('content/platforms.json', JSON.stringify(entries, null, 2));
+
+  test('dashes and banned words in values are errors with line and column', () => {
+    const f = errors(json([{ name: 'Site', summary: `A robust site ${EM} for practice.` }]));
+    assert.deepEqual(f.map((x) => [x.rule, x.text, x.line]), [['banned-word', 'robust', 4], ['em dash', EM, 4]]);
+    assert.equal(f[0]!.column, 19);
+  });
+
+  test('keys and link values are skipped', () => {
+    assert.deepEqual(json([{ robust: 'fine', url: 'https://example.com/leverage' }]), []);
+  });
+
+  test('escaped characters are decoded before checking', () => {
+    assert.equal(errors(lintJson('content/links.json', '[{"description": "a \\u2014 b"}]')).length, 1);
+  });
+
+  test('TODO and "not X, but Y" are warnings', () => {
+    const f = json([{ summary: 'TODO: write this' }, { summary: 'It is not a game, but a course.' }]);
+    assert.equal(warnings(f, 'todo').length, 1);
+    assert.equal(warnings(f, 'negation').length, 1);
+    assert.deepEqual(errors(f), []);
+  });
+
+  test('the caution field in tool frontmatter is linted', () => {
+    const f = lintMarkdown('content/tools/x/index.md', `---\nname: X\ncaution: Scanning is crucial ${EN} ask first.\n---\n`, 'tool');
+    assert.deepEqual(errors(f).map((x) => [x.rule, x.line]), [['banned-word', 3], ['en dash', 3]]);
   });
 });

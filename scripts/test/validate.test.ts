@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { loadChallenge, loadTool, type ValidationContext } from '../../src/lib/content/validate.ts';
+import { loadChallenge, loadLinks, loadPlatforms, loadTool, type ValidationContext } from '../../src/lib/content/validate.ts';
 import { challengeTemplate, toolTemplate } from '../lib/templates.ts';
 
 const PATH = 'content/challenges/sample/writeup.md';
@@ -173,5 +173,91 @@ describe('scaffold templates', () => {
     const source = toolTemplate().replace(/platforms: \[[^\]]*\]/, 'platforms: [linux, amiga]');
     const r = loadTool({ path: 'content/tools/sample/index.md', source }, ctx());
     assert.ok(r.issues.some((i) => i.field === 'platforms' && /amiga/.test(i.message)));
+  });
+});
+
+describe('tool caution', () => {
+  const tool = (extra: string) =>
+    loadTool({ path: 'content/tools/sample/index.md', source: `---\nname: Sample\ncategory: recon\nsummary: A tool.\nplatforms: [linux]\n${extra}---\n\nText.\n` }, ctx());
+
+  test('a caution string is kept', () => {
+    const r = tool('caution: "Only scan machines you own."\n');
+    assert.deepEqual(r.issues, []);
+    assert.equal(r.tool?.caution, 'Only scan machines you own.');
+  });
+
+  test('a caution that is not text is reported', () => {
+    assert.ok(tool('caution: [a, b]\n').issues.some((i) => i.field === 'caution'));
+  });
+
+  test('the new tool categories are accepted', () => {
+    assert.deepEqual(tool('').issues, []);
+    for (const category of ['password', 'wireless', 'active-directory']) {
+      const r = loadTool({ path: 'content/tools/sample/index.md', source: `---\nname: S\ncategory: ${category}\nsummary: A tool.\nplatforms: [linux]\n---\n` }, ctx());
+      assert.deepEqual(r.issues, [], category);
+    }
+  });
+});
+
+describe('platforms.json', () => {
+  const PATH_P = 'content/platforms.json';
+  const good = { name: 'Site', url: 'https://example.com/', summary: 'A site.', category: 'practice', focus: ['web'] };
+  const load = (entries: unknown) => loadPlatforms({ path: PATH_P, source: JSON.stringify(entries, null, 2) });
+
+  test('a valid list loads in file order', () => {
+    const r = load([good, { ...good, name: 'Other', cost: 'Free', tags: ['A'] }]);
+    assert.deepEqual(r.issues, []);
+    assert.deepEqual(r.platforms.map((p) => p.name), ['Site', 'Other']);
+    assert.equal(r.platforms[1]?.cost, 'free');
+    assert.deepEqual(r.platforms[1]?.tags, ['a']);
+  });
+
+  test('issues name the entry and field, with the entry line', () => {
+    const r = load([good, { ...good, name: 'Broken', url: 'example.com' }]);
+    const issue = r.issues.find((i) => i.field === 'Broken > url');
+    assert.ok(issue);
+    assert.match(issue.message, /http/);
+    assert.equal(issue.line, 11);
+    assert.deepEqual(r.platforms, []);
+  });
+
+  test('bad category, focus, and cost values are reported', () => {
+    const r = load([{ ...good, category: 'games', focus: ['crpyto'], cost: 'cheap' }]);
+    assert.deepEqual(r.issues.map((i) => i.field).sort(), ['Site > category', 'Site > cost', 'Site > focus']);
+  });
+
+  test('a missing field without a name uses the entry number', () => {
+    const { name: _name, ...rest } = good;
+    const r = load([rest]);
+    assert.ok(r.issues.some((i) => i.field === 'entry 1 > name' && /missing/.test(i.message)));
+  });
+
+  test('unknown fields and duplicate names are reported', () => {
+    const r = load([good, { ...good, URL: 'x' }]);
+    assert.ok(r.issues.some((i) => i.field === 'Site > URL' && /Did you mean "url"/.test(i.message)));
+    assert.ok(r.issues.some((i) => /more than once/.test(i.message)));
+  });
+
+  test('a trailing comma is a syntax error with a line number', () => {
+    const r = loadPlatforms({ path: PATH_P, source: '[\n  {"name": "a"},\n]\n' });
+    assert.equal(r.issues[0]?.field, 'json');
+    assert.match(r.issues[0]!.message, /not valid JSON at line 2.*comma after the last item/);
+    assert.equal(r.issues[0]?.line, 2);
+  });
+
+  test('a missing comma between entries is found', () => {
+    const r = loadPlatforms({ path: PATH_P, source: '[\n  {"name": "a"}\n  {"name": "b"}\n]\n' });
+    assert.match(r.issues[0]!.message, /line 3.*comma is missing/);
+  });
+
+  test('the top level must be a list', () => {
+    assert.match(loadPlatforms({ path: PATH_P, source: '{}' }).issues[0]!.message, /must be a list/);
+  });
+});
+
+describe('links.json', () => {
+  test('a link without a url is reported', () => {
+    const r = loadLinks({ path: 'content/links.json', source: JSON.stringify([{ name: 'Club', description: 'Our page.' }]) });
+    assert.ok(r.issues.some((i) => i.field === 'Club > url'));
   });
 });

@@ -17,3 +17,10 @@ export function repoFileUrl(repoPath: string): string {
   return `${base('blob')}/${encodePath(repoPath)}`;
 }
 
+
+export type ResourceKind = 'handouts' | 'slides';
+
+/** The content/resources/<kind> folder on GitHub, where officers upload meeting files. */
+export function resourceFolderUrl(kind: ResourceKind): string {
+  return `${base('tree')}/content/resources/${kind}`;
+}

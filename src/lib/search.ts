@@ -1,6 +1,6 @@
 import Fuse, { type IFuseOptions } from 'fuse.js';
 import { DIFFICULTIES } from '../content.config';
-import type { ChallengeSummary, ToolSummary } from './content/types';
+import type { ChallengeSummary, PlatformEntry, ToolSummary } from './content/types';
 
 export const CHALLENGE_SORTS = ['newest', 'oldest', 'title', 'difficulty'] as const;
 export type ChallengeSort = (typeof CHALLENGE_SORTS)[number];
@@ -96,4 +96,29 @@ export function filterTools(items: ToolSummary[], index: Fuse<ToolSummary>, quer
   return search(items, index, query)
     .filter((t) => matches(filters.category, t.category) && matchesAny(filters.platform, t.platforms))
     .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+}
+
+const platformFuseOptions: IFuseOptions<PlatformEntry> = {
+  ...FUSE_BASE,
+  keys: [
+    { name: 'name', weight: 2 },
+    { name: 'summary', weight: 1 },
+    { name: 'focus', weight: 1 },
+    { name: 'category', weight: 1 },
+    { name: 'tags', weight: 1 },
+  ],
+};
+
+export function createPlatformIndex(items: PlatformEntry[]) {
+  return new Fuse(items, platformFuseOptions);
+}
+
+export interface PlatformFilters {
+  category: string[];
+  focus: string[];
+}
+
+/** Keeps the order of content/platforms.json unless a search reorders by match. */
+export function filterPlatforms(items: PlatformEntry[], index: Fuse<PlatformEntry>, query: string, filters: PlatformFilters): PlatformEntry[] {
+  return search(items, index, query).filter((p) => matches(filters.category, p.category) && matchesAny(filters.focus, p.focus));
 }

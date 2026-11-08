@@ -1,13 +1,14 @@
 // npm run lint:content
 //
-// Checks every markdown file under content/, README.md, and the user-facing
-// strings in src/ against the writing rules in scripts/writing-rules.ts. It
+// Checks every markdown file under content/, the string values in content/*.json,
+// README.md, and the user-facing strings in src/ against the writing rules in
+// scripts/writing-rules.ts. It
 // also runs the frontmatter, heading, and image checks from the build.
 // Errors fail the command (and the build). Warnings are printed only.
 
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
-import { lintMarkdown, lintSource, type Finding, type MarkdownKind } from './lib/writing-lint.ts';
+import { lintJson, lintMarkdown, lintSource, type Finding, type MarkdownKind } from './lib/writing-lint.ts';
 import { validateContentTree } from './lib/content-fs.ts';
 
 const root = process.cwd();
@@ -42,6 +43,11 @@ let fileCount = 0;
 for (const abs of walk(join(root, 'content'), (n) => n.endsWith('.md'))) {
   const file = toPosix(relative(root, abs));
   findings.push(...lintMarkdown(file, readFileSync(abs, 'utf8'), kindOf(file)));
+  fileCount++;
+}
+
+for (const abs of walk(join(root, 'content'), (n) => n.endsWith('.json'))) {
+  findings.push(...lintJson(toPosix(relative(root, abs)), readFileSync(abs, 'utf8')));
   fileCount++;
 }
 

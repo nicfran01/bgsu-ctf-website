@@ -58,3 +58,10 @@
   content: '#';
   opacity: 0.7;
 }
+
+/* Marks a tool card whose guide has a caution note. */
+.caution {
+  border-color: var(--color-accent-strong);
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+}

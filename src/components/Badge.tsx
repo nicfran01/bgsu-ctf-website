@@ -20,6 +20,15 @@ export function DifficultyBadge({ value }: { value: Difficulty }) {
   );
 }
 
+export function CautionBadge() {
+  return (
+    <span className={`${styles.badge} ${styles.caution}`} title="This guide has a caution note">
+      <span aria-hidden="true">!</span>
+      Caution
+    </span>
+  );
+}
+
 export function TagList({ tags }: { tags: string[] }) {
   if (!tags.length) return null;
   return (

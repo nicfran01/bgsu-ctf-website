@@ -12,6 +12,8 @@ export interface ContentTree {
   challenges: SourceFile[];
   tools: SourceFile[];
   about: SourceFile | undefined;
+  platforms: SourceFile | undefined;
+  links: SourceFile | undefined;
   filesBySlug: Record<string, ChallengeFile[]>;
   /** Problems found while walking the folders (for example a folder with no markdown file). */
   issues: ContentIssue[];
@@ -84,13 +86,16 @@ export function readContentTree(rootDir: string): ContentTree {
 
   const aboutPath = join(contentDir, 'about.md');
   const about = existsSync(aboutPath) ? read(aboutPath) : undefined;
+  const optional = (name: string) => (existsSync(join(contentDir, name)) ? read(join(contentDir, name)) : undefined);
+  const platforms = optional('platforms.json');
+  const links = optional('links.json');
 
   const ctx: ValidationContext = {
     assetExists: (repoPath) => existsSync(join(rootDir, ...repoPath.split('/'))),
     filesFor: (slug) => filesBySlug[slug] ?? [],
   };
 
-  return { challenges, tools, about, filesBySlug, issues, ctx };
+  return { challenges, tools, about, platforms, links, filesBySlug, issues, ctx };
 }
 
 /** Reads and validates everything under content/. */

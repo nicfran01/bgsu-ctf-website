@@ -1,6 +1,9 @@
 import type {
   CHALLENGE_CATEGORIES,
   DIFFICULTIES,
+  PLATFORM_CATEGORIES,
+  PLATFORM_COSTS,
+  PLATFORM_FOCUS,
   PLATFORMS,
   TOOL_CATEGORIES,
 } from '../../content.config.ts';
@@ -8,7 +11,11 @@ import type {
 export type ChallengeCategory = (typeof CHALLENGE_CATEGORIES)[number];
 export type Difficulty = (typeof DIFFICULTIES)[number];
 export type ToolCategory = (typeof TOOL_CATEGORIES)[number];
+/** An operating system a tool runs on. */
 export type Platform = (typeof PLATFORMS)[number];
+export type PlatformCategory = (typeof PLATFORM_CATEGORIES)[number];
+export type PlatformFocus = (typeof PLATFORM_FOCUS)[number];
+export type PlatformCost = (typeof PLATFORM_COSTS)[number];
 
 /** Frontmatter at the top of content/challenges/<slug>/writeup.md */
 export interface ChallengeFrontmatter {
@@ -32,7 +39,28 @@ export interface ToolFrontmatter {
   summary: string;
   platforms: Platform[];
   officialUrl?: string;
+  /** One or two plain sentences shown in a callout above the guide. */
+  caution?: string;
   tags: string[];
+}
+
+/** One entry in content/platforms.json: a practice or learning site. */
+export interface PlatformEntry {
+  name: string;
+  url: string;
+  /** One sentence shown on the card. */
+  summary: string;
+  category: PlatformCategory;
+  focus: PlatformFocus[];
+  cost?: PlatformCost;
+  tags: string[];
+}
+
+/** One entry in content/links.json. */
+export interface LinkEntry {
+  name: string;
+  url: string;
+  description: string;
 }
 
 export interface ChallengeFile {

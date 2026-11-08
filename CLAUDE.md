@@ -4,11 +4,11 @@ Rules for working in this repository. Read this before changing anything.
 
 ## What this is
 
-A static site for the BGSU CTF club: challenge write-ups, challenge files, and tool guides. React 19 + Vite + strict TypeScript, plain CSS (tokens in `src/styles/tokens.css`, CSS modules per component), HashRouter, deployed to GitHub Pages and Vercel from the same code.
+A static site for the BGSU CTF club: challenge write-ups, challenge files, tool guides, a list of practice platforms, meeting handouts and slides, and club links. React 19 + Vite + strict TypeScript, plain CSS (tokens in `src/styles/tokens.css`, CSS modules per component), HashRouter, deployed to GitHub Pages and Vercel from the same code.
 
 ## The most important rule
 
-**Content changes never require code changes.** Adding a challenge, write-up, or tool means adding a folder with a markdown file under `content/`. If a request seems to need a code change to show new content, the content model is wrong; fix the model in one place, never special-case one challenge in code.
+**Content changes never require code changes.** Adding a challenge, write-up, or tool means adding a folder with a markdown file under `content/`. Adding a platform or link means adding an entry to `content/platforms.json` or `content/links.json`. Adding a handout or slide deck means adding a file to `content/resources/handouts/` or `content/resources/slides/`. If a request seems to need a code change to show new content, the content model is wrong; fix the model in one place, never special-case one challenge in code.
 
 Do not invent club facts, dates, names, meeting places, or links. Use a clearly marked `TODO:` placeholder instead.
 
@@ -24,21 +24,31 @@ content/
     index.md        frontmatter + guide body
     images/
   about.md          About page body (frontmatter optional)
+  platforms.json    practice and learning sites (Platforms page, Home quick-launch row)
+  links.json        club links (footer link row)
+  resources/
+    handouts/       meeting handouts, linked from the Resources page (never bundled)
+    slides/         meeting slide decks, linked from the Resources page (never bundled)
 ```
 
 - The folder name is the slug and the URL. It must match `^[a-z0-9]+(-[a-z0-9]+)*$`. There is no slug field.
-- Allowed values (categories, difficulties, tool categories, platforms) and the required headings live only in `src/content.config.ts`.
+- Allowed values (categories, difficulties, tool categories, operating systems in `PLATFORMS`, and the platform list's `PLATFORM_CATEGORIES`, `PLATFORM_FOCUS`, and `PLATFORM_COSTS`) and the required headings live only in `src/content.config.ts`.
 - Challenge frontmatter: `title`, `category`, `difficulty`, `date` (YYYY-MM-DD), `author`, `summary` are required; `ctf`, `points` (number), `tags` (list), `challengeUrl` (http/https) are optional. Unknown fields are errors.
-- Tool frontmatter: `name`, `category`, `summary`, `platforms` (list) are required; `officialUrl`, `tags` are optional.
+- Tool frontmatter: `name`, `category`, `summary`, `platforms` (list) are required; `officialUrl`, `caution`, `tags` are optional.
+- `caution` is 1 or 2 plain sentences for tools that can break the law or university policy when misused (scanners, password crackers, wireless and Active Directory tools). The tool page shows it in a callout above the guide, and the tool card shows a Caution marker. The nmap caution must keep saying not to scan any BGSU network, host, or address, including campus Wi-Fi and residence hall networks.
+- `platforms.json` is a list of objects. `name`, `url` (http/https), `summary` (1 sentence), `category`, and `focus` (list) are required; `cost` and `tags` (list) are optional. Fill in `cost` only when the platform's own site confirms it. Entries show in file order.
+- `links.json` is a list of objects with `name`, `url` (http/https), and `description`, all required. Entries show in file order in the footer; there is no Links page. `description` shows as the link's hover text. An Instagram URL gets an Instagram icon (`ICONS_BY_HOST` in `src/components/Footer.tsx`). Do not add a Discord link.
+- In both JSON files, unknown fields, duplicate names, and syntax errors fail the build with the entry name and field (for example `[Hack The Box > url]`).
+- The Resources page buttons link to `https://github.com/<owner>/<repo>/tree/<branch>/content/resources/handouts` and `.../slides`, built by `resourceFolderUrl` in `src/lib/github.ts`. The site never reads the files in those folders.
 - Bodies have no `#` heading. The page title comes from frontmatter.
 - Images use relative paths into the same folder's `images/` and need alt text. Relative links such as `./files/solve.py` open the file on GitHub.
 - The Download button appears only when `files/` has a file other than `.gitkeep`. It links to `https://github.com/<owner>/<repo>/tree/<branch>/content/challenges/<slug>/files`, with owner, repo, and branch from `src/site.config.ts`.
 
 ## How content is loaded
 
-- `src/lib/content/load.ts` discovers files with `import.meta.glob(..., { query: '?content' })`. Those modules carry frontmatter only (`ChallengeSummary`, `ToolSummary`), never the markdown body.
+- `src/lib/content/load.ts` discovers files with `import.meta.glob(..., { query: '?content' })`. Those modules carry frontmatter only (`ChallengeSummary`, `ToolSummary`), never the markdown body. `platforms.json` and `links.json` load through the same query, so the browser gets validated `PlatformEntry[]` and `LinkEntry[]`.
 - Markdown bodies load on demand through `useMarkdownBody`, which imports each file with the `?body` query. Each write-up becomes its own small chunk, so the main bundle does not grow with the amount of content. Never import bodies eagerly.
-- `scripts/vite-content-plugin.ts` answers those imports: it parses frontmatter with `yaml` at build time and validates with `src/lib/content/validate.ts`, so the YAML parser never ships to the browser. It also validates the whole `content/` tree in `buildStart` and fails the build with file and field names.
+- `scripts/vite-content-plugin.ts` answers those imports: it parses frontmatter with `yaml` (and the JSON lists with `JSON.parse`) at build time and validates with `src/lib/content/validate.ts`, so the YAML parser never ships to the browser. It also validates the whole `content/` tree in `buildStart` and fails the build with file and field names.
 - `src/lib/content/{types,frontmatter,validate,headings,paths}.ts` are shared by the browser, the Vite plugin, the linter, and the scaffold scripts. Keep them free of DOM, Node, and `import.meta` APIs.
 - Pages that render markdown (`ChallengeDetailPage`, `ToolDetailPage`, `AboutPage`) are lazy-loaded so list pages stay small.
 - The Tag filter on the Challenges page is a dropdown (`TagDropdown`) so a long tag list stays out of the way. Category and difficulty stay as buttons.
@@ -89,8 +99,9 @@ One stray instance is not the problem; density and repetition are. Vary sentence
 
 - `scripts/check-writing.ts` runs in `npm run build`, `npm run lint:content`, and the "Check content" pull request workflow.
 - All word lists, fixes, and warning thresholds are in `scripts/writing-rules.ts`. Matching logic is in `scripts/lib/writing-lint.ts`.
-- Scope: every `.md` under `content/` (frontmatter values included), `README.md`, and strings, JSX text, and comments in `src/**/*.{ts,tsx}`. Dashes are checked on every line of `src`. This file (CLAUDE.md) and `writing-rules.ts` are not linted because they have to name the banned words.
+- Scope: every `.md` under `content/` (frontmatter values included, so `caution` is checked), string values in every `.json` under `content/` (keys and link values are skipped), `README.md`, and strings, JSX text, and comments in `src/**/*.{ts,tsx}`. Dashes are checked on every line of `src`. This file (CLAUDE.md) and `writing-rules.ts` are not linted because they have to name the banned words.
 - Skipped: fenced code, inline code, link and image URLs, HTML comments, and blockquote lines inside the Challenge Description section of a write-up (the verbatim prompt).
+- JSON has no comments, so `writing-allow` does not work in `platforms.json` or `links.json`. Reword instead.
 - Escape hatch: words marked `allowable` in `writing-rules.ts` (currently `navigate` and `landscape`) may be kept with `<!-- writing-allow: navigate -->` on the same line or the line above. Dashes can never be allowed. Do not add words to the allowable list without asking the maintainer.
 - Warnings (printed, never failing): "not X, but Y" patterns, editorializing participles, three trailing-participle sentences in a row, three or more sentences starting with the same word, runs of short fragments, missing tool headings, leftover `TODO`.
 

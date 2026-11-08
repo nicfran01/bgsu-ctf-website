@@ -23,10 +23,28 @@ export const TOOL_CATEGORIES = [
   'network',
   'reverse',
   'pwn',
+  'password',
+  'wireless',
+  'active-directory',
   'general',
 ] as const;
 
 export const PLATFORMS = ['linux', 'macos', 'windows', 'web'] as const;
+
+// Practice and learning sites in content/platforms.json.
+export const PLATFORM_CATEGORIES = ['learning', 'practice', 'events'] as const;
+export const PLATFORM_FOCUS = [
+  'web',
+  'crypto',
+  'pwn',
+  'reverse',
+  'forensics',
+  'osint',
+  'network',
+  'active-directory',
+  'general',
+] as const;
+export const PLATFORM_COSTS = ['free', 'freemium', 'paid'] as const;
 
 // Display labels. Anything missing here falls back to the raw value.
 export const LABELS: Record<string, string> = {
@@ -40,6 +58,15 @@ export const LABELS: Record<string, string> = {
   misc: 'Misc',
   recon: 'Recon',
   general: 'General',
+  password: 'Password Cracking',
+  wireless: 'Wireless',
+  'active-directory': 'Active Directory',
+  learning: 'Learning',
+  practice: 'Practice',
+  events: 'Events',
+  free: 'Free',
+  freemium: 'Free with paid tier',
+  paid: 'Paid',
   easy: 'Easy',
   medium: 'Medium',
   hard: 'Hard',

@@ -1,6 +1,6 @@
 # BGSU CTF Club Website
 
-The club's site for challenge write-ups, challenge files, and tool guides. Every page comes from markdown files in the `content/` folder. To add a write-up or a tool guide, you add a folder with a markdown file and open a pull request. You never need to touch the code in `src/`.
+The club's site for challenge write-ups, challenge files, tool guides, practice platforms, meeting handouts and slides, and club links. Every page comes from files in the `content/` folder. A write-up or tool guide is a folder with a markdown file. A platform or link is an entry in a JSON file, and a handout or slide deck is a file uploaded to a folder. Each change goes through a pull request, and you never need to touch the code in `src/`.
 
 ## Quick start
 
@@ -96,13 +96,83 @@ This creates `content/tools/nmap/index.md` and an `images/` folder. Frontmatter 
 | Field | Required | What to put |
 | --- | --- | --- |
 | `name` | yes | Tool name |
-| `category` | yes | One of `recon`, `web`, `crypto`, `forensics`, `network`, `reverse`, `pwn`, `general` |
+| `category` | yes | One of `recon`, `web`, `crypto`, `forensics`, `network`, `reverse`, `pwn`, `password`, `wireless`, `active-directory`, `general` |
 | `summary` | yes | One sentence for the tool card |
 | `platforms` | yes | Any of `linux`, `macos`, `windows`, `web`, as a list |
 | `officialUrl` | no | The tool's home page |
+| `caution` | no | 1 or 2 plain sentences shown in a box above the guide |
 | `tags` | no | A list of words |
 
 Sections, in order: **What It Is**, **When To Use It**, **Installation** (with `###` subsections for Linux, macOS, and Windows as they apply), **Basic Usage** (real commands with their output), **Common Pitfalls**, **References**. The linter warns when one is missing. `content/tools/curl/index.md` is a complete example.
+
+### Add a caution note
+
+Some tools can break the law or university policy when they are pointed at the wrong target: network scanners, password crackers, wireless tools, and Active Directory tools. For those, add a `caution` line to the frontmatter:
+
+```yaml
+caution: "Only run this against networks you own or have written permission to test."
+```
+
+The tool page shows it in a box above the guide, and the tool card on the Tools page gets a **Caution** marker. Keep it to one or two plain sentences that say what is allowed. The linter checks it like the rest of the frontmatter.
+
+## Add a platform
+
+Practice sites and courses live in `content/platforms.json`. Each entry becomes a card on the Platforms page and a link in the row on the Home page. To add one, copy an entry, paste it at the end of the list, and change the values:
+
+```json
+  {
+    "name": "Example CTF",
+    "url": "https://example.com/",
+    "summary": "One sentence that says what members can practice there.",
+    "category": "practice",
+    "focus": ["web", "crypto"],
+    "cost": "free",
+    "tags": ["beginner"]
+  }
+```
+
+| Field | Required | What to put |
+| --- | --- | --- |
+| `name` | yes | The platform's name as it writes it |
+| `url` | yes | The official site, starting with `https://` |
+| `summary` | yes | One sentence for the card |
+| `category` | yes | One of `learning`, `practice`, `events` |
+| `focus` | yes | A list from `web`, `crypto`, `pwn`, `reverse`, `forensics`, `osint`, `network`, `active-directory`, `general` |
+| `cost` | no | `free`, `freemium` (free with a paid tier), or `paid`. Leave it out unless the platform's site says so |
+| `tags` | no | A list of words that help search |
+
+JSON is strict about punctuation. Put a comma between entries but not after the last one, and wrap every text value in double quotes. If you get it wrong, the build names the line, for example:
+
+```text
+content/platforms.json
+  41:1     error    content/json
+           -> the file is not valid JSON at line 41, column 4: there is a comma after the last item
+```
+
+Cards appear in the order of the file, so put the most useful platforms first.
+
+## Add a link
+
+Club links live in `content/links.json`. Each entry shows in the row of links in the footer, in file order. The description is the hover text, and an Instagram URL gets an Instagram icon.
+
+```json
+  {
+    "name": "Instagram",
+    "url": "https://www.instagram.com/bgsu_ctf/",
+    "description": "The club's Instagram account, @bgsu_ctf."
+  }
+```
+
+All three fields are required, and `url` must start with `https://` or `http://`. The same comma rules apply as in `platforms.json`.
+
+## Add handouts and slides
+
+The Resources page has two buttons that open these folders on GitHub:
+
+- `content/resources/handouts/` for handouts such as cheat sheets and worksheets
+- `content/resources/slides/` for slide decks
+
+Upload the file to the right folder (on GitHub: **Add file > Upload files**) and open a pull request. Start the file name with the meeting date, such as `2026-11-05-intro-to-steganography.pdf`, and prefer PDF so it opens in the browser. The site never copies these files, so nothing else needs to change. The `README.md` in each folder has the details.
 
 ## Writing rules
 
@@ -138,7 +208,7 @@ content/challenges/cookie-monster/writeup.md
            -> "use"
 ```
 
-- **Errors** fail the command, the build, and the pull request check. They cover dashes, banned words, frontmatter, required headings, and images.
+- **Errors** fail the command, the build, and the pull request check. They cover dashes, banned words, frontmatter, the JSON files, required headings, and images.
 - **Warnings** print but do not fail. They point at patterns that read as filler, such as three sentences in a row starting with the same word, or a leftover `TODO`.
 
 `npm test` runs the tests for the content checks and the linter.
@@ -190,12 +260,18 @@ The **Check content** workflow runs on every pull request, but GitHub only block
 
 ## Change allowed values
 
-Categories, difficulties, tool categories, platforms, and the required headings are in `src/content.config.ts`. To add a category, add it to the list there. The site, the build checks, the linter, and the templates all read from that file.
+Categories, difficulties, tool categories, operating systems, platform categories, platform focus values, platform costs, and the required headings are in `src/content.config.ts`. To add a category, add it to the list there. The site, the build checks, the linter, and the templates all read from that file.
 
 ## Project layout
 
 ```text
-content/             all site content (challenges, tools, about.md)
+content/             all site content
+  challenges/        one folder per write-up
+  tools/             one folder per tool guide
+  platforms.json     practice platforms
+  links.json         club links
+  resources/         handouts/ and slides/ folders linked from the Resources page
+  about.md           About page
 scripts/             linter, scaffold scripts, Vite content plugin, tests
   writing-rules.ts   banned words and warning patterns (edit this to change the rules)
 src/

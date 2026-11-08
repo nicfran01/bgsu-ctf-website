@@ -1,0 +1,83 @@
+[
+  {
+    "name": "CryptoHack",
+    "url": "https://cryptohack.org/",
+    "summary": "Free cryptography course with challenges that start with encoding and XOR and build up to RSA, elliptic curves, and attacks on real protocols.",
+    "category": "learning",
+    "focus": ["crypto"],
+    "cost": "free",
+    "tags": ["rsa", "aes", "elliptic-curves"]
+  },
+  {
+    "name": "OverTheWire",
+    "url": "https://overthewire.org/wargames/",
+    "summary": "Wargames played over SSH, starting with Bandit for Linux command line basics and moving on to binary exploitation in Narnia and Behemoth.",
+    "category": "practice",
+    "focus": ["general", "pwn"],
+    "cost": "free",
+    "tags": ["linux", "ssh", "bandit"]
+  },
+  {
+    "name": "PortSwigger Web Security Academy",
+    "url": "https://portswigger.net/web-security",
+    "summary": "Free web security course from the makers of Burp Suite, with a lab for each topic such as SQL injection, XSS, and access control.",
+    "category": "learning",
+    "focus": ["web"],
+    "cost": "free",
+    "tags": ["burp-suite", "sqli", "xss"]
+  },
+  {
+    "name": "pwn.college",
+    "url": "https://pwn.college/",
+    "summary": "Arizona State University's free course with hands-on modules on Linux basics, reverse engineering, and binary exploitation.",
+    "category": "learning",
+    "focus": ["pwn", "reverse"],
+    "cost": "free",
+    "tags": ["asu", "linux", "binary-exploitation"]
+  },
+  {
+    "name": "CyLab Security Academy",
+    "url": "https://cylabacademy.org/",
+    "summary": "Carnegie Mellon's free cybersecurity learning platform, formerly picoCTF, with beginner challenges in the common CTF categories.",
+    "category": "learning",
+    "focus": ["general"],
+    "cost": "free",
+    "tags": ["picoctf", "beginner", "cmu"]
+  },
+  {
+    "name": "Hack The Box",
+    "url": "https://www.hackthebox.com/",
+    "summary": "Vulnerable machines and challenges you attack in a lab over VPN, plus guided courses in HTB Academy.",
+    "category": "practice",
+    "focus": ["general", "web", "active-directory"],
+    "cost": "freemium",
+    "tags": ["htb", "vpn", "machines"]
+  },
+  {
+    "name": "TryHackMe",
+    "url": "https://tryhackme.com/",
+    "summary": "Guided rooms for beginners that run in the browser, many with a machine you start and attack as you read.",
+    "category": "learning",
+    "focus": ["general"],
+    "cost": "freemium",
+    "tags": ["thm", "beginner", "rooms"]
+  },
+  {
+    "name": "OWASP Juice Shop",
+    "url": "https://owasp.org/www-project-juice-shop/",
+    "summary": "An intentionally insecure web shop you run on your own computer to practice finding web bugs, with a built-in score board.",
+    "category": "practice",
+    "focus": ["web"],
+    "cost": "free",
+    "tags": ["owasp", "docker", "self-hosted"]
+  },
+  {
+    "name": "CTFtime",
+    "url": "https://ctftime.org/",
+    "summary": "Calendar of upcoming CTF events, with team rankings and links to write-ups from past events.",
+    "category": "events",
+    "focus": ["general"],
+    "cost": "free",
+    "tags": ["calendar", "rankings", "write-ups"]
+  }
+]

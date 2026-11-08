@@ -66,6 +66,8 @@ category: ${TOOL_CATEGORIES[TOOL_CATEGORIES.length - 1]} # one of: ${TOOL_CATEGO
 summary: "TODO: one sentence shown on the tool card."
 platforms: [${PLATFORMS.slice(0, 3).join(', ')}] # any of: ${PLATFORMS.join(', ')}
 # officialUrl: https://example.com
+# caution: "Only use this against targets you own or have permission to test."
+#   Shown in a box above the guide. Use it when misusing the tool could break a law or university policy.
 tags: []
 ---
 

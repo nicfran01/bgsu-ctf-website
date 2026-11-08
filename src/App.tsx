@@ -6,6 +6,8 @@ import { contentIssues } from './lib/content/load';
 import { ChallengesPage } from './pages/ChallengesPage';
 import { HomePage } from './pages/HomePage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { PlatformsPage } from './pages/PlatformsPage';
+import { ResourcesPage } from './pages/ResourcesPage';
 import { ToolsPage } from './pages/ToolsPage';
 
 // Pages that render markdown load the markdown renderer and syntax
@@ -26,6 +28,8 @@ export function App() {
             <Route path="challenges/:slug" element={<ChallengeDetailPage />} />
             <Route path="tools" element={<ToolsPage />} />
             <Route path="tools/:slug" element={<ToolDetailPage />} />
+            <Route path="platforms" element={<PlatformsPage />} />
+            <Route path="resources" element={<ResourcesPage />} />
             <Route path="about" element={<AboutPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>

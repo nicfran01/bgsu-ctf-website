@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Instagram",
+    "url": "https://www.instagram.com/bgsu_ctf/",
+    "description": "The club's Instagram account, @bgsu_ctf."
+  },
+  {
+    "name": "BGSU Computer Science",
+    "url": "https://www.bgsu.edu/arts-and-sciences/computer-science.html",
+    "description": "The BGSU Department of Computer Science website."
+  },
+  {
+    "name": "BGSU Computer Science and Cybersecurity program",
+    "url": "https://www.bgsu.edu/academics/computer-science-cybersecurity.html",
+    "description": "The BGSU academics page for computer science and cybersecurity."
+  }
+]

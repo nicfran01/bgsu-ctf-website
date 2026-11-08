@@ -278,6 +278,47 @@ export function lintMarkdown(file: string, source: string, kind: MarkdownKind): 
 }
 
 // ---------------------------------------------------------------------------
+// JSON content (content/platforms.json, content/links.json)
+
+const JSON_STRING = /"(?:[^"\\\n]|\\.)*"/g;
+
+/**
+ * Lints every string value in a JSON content file. Keys and values that are
+ * links are skipped. Errors point at the matched text; warnings point at the
+ * opening quote of the value.
+ */
+export function lintJson(file: string, source: string): Finding[] {
+  const findings: Finding[] = [];
+  for (const m of source.matchAll(JSON_STRING)) {
+    const start = m.index ?? 0;
+    if (/^\s*:/.test(source.slice(start + m[0].length))) continue; // a key
+    let value: string;
+    try {
+      value = JSON.parse(m[0]) as string;
+    } catch {
+      continue; // the validator reports broken JSON
+    }
+    if (/^https?:\/\//i.test(value.trim())) continue;
+
+    const before = source.slice(0, start).split('\n');
+    const line = before.length;
+    const column = (before[before.length - 1]?.length ?? 0) + 1; // 0-based column of the text after the quote
+    findings.push(...checkErrors(file, line, column, value, new Set()));
+
+    const warn = (rule: string, text: string, fix: string) =>
+      findings.push({ file, line, column, severity: 'warning', rule, text: text.length > 70 ? `${text.slice(0, 67)}...` : text, fix });
+    for (const rule of WARNINGS.negation) {
+      for (const match of value.matchAll(new RegExp(rule.pattern, 'giu'))) warn('negation', match[0], `${rule.message}: ${rule.fix}`);
+    }
+    for (const match of value.matchAll(new RegExp(WARNINGS.editorialParticiple.pattern, 'giu'))) {
+      warn('editorial-participle', match[0].replace(/^,\s*/, ', '), WARNINGS.editorialParticiple.fix);
+    }
+    if (new RegExp(WARNINGS.todo.pattern).test(value)) warn('todo', value, WARNINGS.todo.fix);
+  }
+  return findings.sort(byPosition);
+}
+
+// ---------------------------------------------------------------------------
 // TypeScript and TSX source
 
 /** Lints user-facing strings, JSX text, and comments in a source file. */

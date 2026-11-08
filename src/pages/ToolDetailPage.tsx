@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { Link, useParams } from 'react-router';
 import { CategoryBadge, TagList } from '../components/Badge';
+import { Caution } from '../components/Caution';
 import { Markdown } from '../components/Markdown';
 import sidebar from '../components/Sidebar.module.css';
 import { TableOfContents } from '../components/TableOfContents';
@@ -36,6 +37,8 @@ export function ToolDetailPage() {
         <h1 className="page-title">{tool.name}</h1>
         <p className="page-lead">{tool.summary}</p>
       </header>
+
+      {tool.caution && <Caution text={tool.caution} />}
 
       <div className={styles.layout}>
         <aside className={styles.sidebar}>

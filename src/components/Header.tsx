@@ -6,6 +6,8 @@ import styles from './Header.module.css';
 const NAV_ITEMS = [
   { to: '/challenges', label: 'Challenges' },
   { to: '/tools', label: 'Tools' },
+  { to: '/platforms', label: 'Platforms' },
+  { to: '/resources', label: 'Resources' },
   { to: '/about', label: 'About' },
 ];
 

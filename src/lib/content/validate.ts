@@ -5,6 +5,9 @@
 import {
   CHALLENGE_CATEGORIES,
   DIFFICULTIES,
+  PLATFORM_CATEGORIES,
+  PLATFORM_COSTS,
+  PLATFORM_FOCUS,
   PLATFORMS,
   TOOL_CATEGORIES,
   WRITEUP_HEADINGS,
@@ -17,6 +20,8 @@ import type {
   ChallengeFile,
   ChallengeFrontmatter,
   ContentIssue,
+  LinkEntry,
+  PlatformEntry,
   Tool,
   ToolFrontmatter,
 } from './types.ts';
@@ -55,13 +60,19 @@ type Data = Record<string, unknown>;
 class FieldReader {
   readonly issues: ContentIssue[] = [];
 
+  /**
+   * `entry` names the item inside a list file (for example "Hack The Box"),
+   * so issues read [Hack The Box > url]. `line` is where that item starts.
+   */
   constructor(
     private readonly file: string,
     private readonly data: Data,
+    private readonly where: { entry?: string; line?: number } = {},
   ) {}
 
   private fail(field: string, message: string) {
-    this.issues.push({ file: this.file, field, message, line: 1 });
+    const name = this.where.entry ? `${this.where.entry} > ${field}` : field;
+    this.issues.push({ file: this.file, field: name, message, line: this.where.line ?? 1 });
   }
 
   requiredString(field: string): string {
@@ -98,6 +109,17 @@ class FieldReader {
     return normalized as T;
   }
 
+  optionalEnum<T extends string>(field: string, allowed: readonly T[]): T | undefined {
+    const value = this.optionalString(field);
+    if (value === undefined) return undefined;
+    const normalized = value.toLowerCase();
+    if (!(allowed as readonly string[]).includes(normalized)) {
+      this.fail(field, `"${field}" must be one of ${allowed.join(', ')} (got "${value}")`);
+      return undefined;
+    }
+    return normalized as T;
+  }
+
   requiredDate(field: string): string {
     const value = this.requiredString(field);
     if (!value) return '';
@@ -130,6 +152,14 @@ class FieldReader {
     if (!/^https?:\/\/[^\s]+$/i.test(value)) {
       this.fail(field, `"${field}" must be a full link starting with http:// or https:// (got "${value}")`);
       return undefined;
+    }
+    return value;
+  }
+
+  requiredUrl(field: string): string {
+    const value = this.requiredString(field);
+    if (value && !/^https?:\/\/[^\s]+$/i.test(value)) {
+      this.fail(field, `"${field}" must be a full link starting with http:// or https:// (got "${value}")`);
     }
     return value;
   }
@@ -213,7 +243,7 @@ function checkImages(file: SourceFile, body: string, bodyStartLine: number, ctx:
 // Entry points
 
 const CHALLENGE_FIELDS = ['title', 'category', 'difficulty', 'date', 'ctf', 'points', 'author', 'tags', 'summary', 'challengeUrl'] as const;
-const TOOL_FIELDS = ['name', 'category', 'summary', 'platforms', 'officialUrl', 'tags'] as const;
+const TOOL_FIELDS = ['name', 'category', 'summary', 'platforms', 'officialUrl', 'caution', 'tags'] as const;
 
 function parseOrIssue(file: SourceFile) {
   try {
@@ -288,7 +318,7 @@ export function loadTool(file: SourceFile, ctx: ValidationContext): { tool: Tool
       platforms: r.enumList('platforms', PLATFORMS, true),
       tags: r.stringList('tags').map((t) => t.toLowerCase()),
     },
-    { officialUrl: r.optionalUrl('officialUrl') },
+    { officialUrl: r.optionalUrl('officialUrl'), caution: r.optionalString('caution') },
   );
   r.unknownKeys(TOOL_FIELDS);
   issues.push(...r.issues);
@@ -308,20 +338,204 @@ export function loadPage(file: SourceFile, ctx: ValidationContext): { body: stri
   return { body: parsed.body, issues: [...issues, ...checkImages(file, parsed.body, parsed.bodyStartLine, ctx)] };
 }
 
+// ---------------------------------------------------------------------------
+// JSON list files (content/platforms.json, content/links.json)
+
+/** 1-based line and column of a character offset. */
+function lineAndColumn(source: string, offset: number): { line: number; column: number } {
+  const before = source.slice(0, offset).split('\n');
+  return { line: before.length, column: (before[before.length - 1]?.length ?? 0) + 1 };
+}
+
+/** The line where each item of the top-level array starts, skipping text inside strings. */
+function itemLines(source: string): number[] {
+  const lines: number[] = [];
+  let depth = 0;
+  let inString = false;
+  let line = 1;
+  let expectItem = false;
+  for (let i = 0; i < source.length; i++) {
+    const c = source[i]!;
+    if (c === '\n') line++;
+    if (inString) {
+      if (c === '\\') i++;
+      else if (c === '"') inString = false;
+      continue;
+    }
+    if (depth === 1 && expectItem && !/\s/.test(c) && c !== ']') {
+      lines.push(line);
+      expectItem = false;
+    }
+    if (c === '"') inString = true;
+    else if (c === '[' || c === '{') {
+      depth++;
+      if (depth === 1) expectItem = true;
+    } else if (c === ']' || c === '}') depth--;
+    else if (c === ',' && depth === 1) expectItem = true;
+  }
+  return lines;
+}
+
+/**
+ * Finds the two mistakes people make most when editing a JSON list by hand:
+ * a comma before ] or }, and a missing comma between two values. Returns the
+ * offset of the problem and a description, or null.
+ */
+function findCommaMistake(source: string): { offset: number; problem: string } | null {
+  let inString = false;
+  // The last character outside strings that was not whitespace, and where it was.
+  let last = '';
+  let lastAt = 0;
+  for (let i = 0; i < source.length; i++) {
+    const c = source[i]!;
+    if (inString) {
+      if (c === '\\') i++;
+      else if (c === '"') {
+        inString = false;
+        last = '"';
+        lastAt = i;
+      }
+      continue;
+    }
+    if (/\s/.test(c)) continue;
+    if ((c === ']' || c === '}') && last === ',') return { offset: lastAt, problem: 'there is a comma after the last item' };
+    const endsValue = last === '"' || last === '}' || last === ']' || /[\da-z]/i.test(last);
+    if ((c === '"' || c === '{' || c === '[') && endsValue) return { offset: i, problem: 'a comma is missing before this item' };
+    if (c === '"') inString = true;
+    else {
+      last = c;
+      lastAt = i;
+    }
+  }
+  return null;
+}
+
+function jsonSyntaxIssue(file: SourceFile, err: SyntaxError): ContentIssue {
+  const message = err.message.split('\n')[0]!;
+  const lc = /line (\d+) column (\d+)/.exec(message);
+  const pos = /position (\d+)/.exec(message);
+  const mistake = findCommaMistake(file.source);
+  const at = mistake
+    ? lineAndColumn(file.source, mistake.offset)
+    : lc
+      ? { line: Number(lc[1]), column: Number(lc[2]) }
+      : pos
+        ? lineAndColumn(file.source, Number(pos[1]))
+        : undefined;
+  const where = at ? ` at line ${at.line}, column ${at.column}` : '';
+  const hint = mistake
+    ? `${mistake.problem}`
+    : `${message.replace(/\s*\(line \d+ column \d+\)/, '')}. Check for a missing comma between entries, a comma after the last entry, or a missing quote`;
+  const issue: ContentIssue = {
+    file: file.path,
+    field: 'json',
+    message: `the file is not valid JSON${where}: ${hint}`,
+  };
+  if (at) issue.line = at.line;
+  return issue;
+}
+
+/**
+ * Parses a JSON file whose top level is a list of objects, then reads each
+ * object with `read`. Issues name the entry (by its "name" value) and field.
+ */
+function loadJsonList<T extends { name: string }>(
+  file: SourceFile,
+  fields: readonly string[],
+  read: (r: FieldReader) => T,
+): { items: T[]; issues: ContentIssue[] } {
+  let data: unknown;
+  try {
+    data = JSON.parse(file.source.replace(/^\uFEFF/, ''));
+  } catch (err) {
+    if (err instanceof SyntaxError) return { items: [], issues: [jsonSyntaxIssue(file, err)] };
+    throw err;
+  }
+  if (!Array.isArray(data)) {
+    return { items: [], issues: [{ file: file.path, field: 'json', line: 1, message: 'the file must be a list: start it with [ and end it with ], with one { ... } entry per item' }] };
+  }
+
+  const lines = itemLines(file.source);
+  const issues: ContentIssue[] = [];
+  const items: T[] = [];
+  const seen = new Set<string>();
+  data.forEach((raw, i) => {
+    const line = lines[i] ?? 1;
+    const fallback = `entry ${i + 1}`;
+    if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
+      issues.push({ file: file.path, field: fallback, line, message: 'each entry must be an object in { } braces' });
+      return;
+    }
+    const rawName = (raw as Data).name;
+    const entry = typeof rawName === 'string' && rawName.trim() ? rawName.trim() : fallback;
+    const r = new FieldReader(file.path, raw as Data, { entry, line });
+    const item = read(r);
+    r.unknownKeys(fields);
+    const key = item.name.toLowerCase();
+    if (key && seen.has(key)) issues.push({ file: file.path, field: `${entry} > name`, line, message: `"${item.name}" is listed more than once` });
+    seen.add(key);
+    issues.push(...r.issues);
+    if (!r.issues.length) items.push(item);
+  });
+  return { items, issues };
+}
+
+const PLATFORM_FIELDS = ['name', 'url', 'summary', 'category', 'focus', 'cost', 'tags'] as const;
+const LINK_FIELDS = ['name', 'url', 'description'] as const;
+
+export function loadPlatforms(file: SourceFile): { platforms: PlatformEntry[]; issues: ContentIssue[] } {
+  const { items, issues } = loadJsonList(file, PLATFORM_FIELDS, (r) =>
+    withOptional<PlatformEntry>(
+      {
+        name: r.requiredString('name'),
+        url: r.requiredUrl('url'),
+        summary: r.requiredString('summary'),
+        category: r.requiredEnum('category', PLATFORM_CATEGORIES),
+        focus: r.enumList('focus', PLATFORM_FOCUS, true),
+        tags: r.stringList('tags').map((t) => t.toLowerCase()),
+      },
+      { cost: r.optionalEnum('cost', PLATFORM_COSTS) },
+    ),
+  );
+  return { platforms: issues.length ? [] : items, issues };
+}
+
+export function loadLinks(file: SourceFile): { links: LinkEntry[]; issues: ContentIssue[] } {
+  const { items, issues } = loadJsonList(file, LINK_FIELDS, (r) => ({
+    name: r.requiredString('name'),
+    url: r.requiredUrl('url'),
+    description: r.requiredString('description'),
+  }));
+  return { links: issues.length ? [] : items, issues };
+}
+
+// ---------------------------------------------------------------------------
+// Everything
+
 export interface ContentSet {
   challenges: Challenge[];
   tools: Tool[];
   about: string;
+  platforms: PlatformEntry[];
+  links: LinkEntry[];
   issues: ContentIssue[];
 }
 
 export function loadContent(
-  input: { challenges: SourceFile[]; tools: SourceFile[]; about?: SourceFile | undefined },
+  input: {
+    challenges: SourceFile[];
+    tools: SourceFile[];
+    about?: SourceFile | undefined;
+    platforms?: SourceFile | undefined;
+    links?: SourceFile | undefined;
+  },
   ctx: ValidationContext,
 ): ContentSet {
   const issues: ContentIssue[] = [];
   const challenges: Challenge[] = [];
   const tools: Tool[] = [];
+  let platforms: PlatformEntry[] = [];
+  let links: LinkEntry[] = [];
 
   for (const file of input.challenges) {
     const result = loadChallenge(file, ctx);
@@ -340,9 +554,20 @@ export function loadContent(
     about = result.body;
   }
 
+  if (input.platforms) {
+    const result = loadPlatforms(input.platforms);
+    issues.push(...result.issues);
+    platforms = result.platforms;
+  }
+  if (input.links) {
+    const result = loadLinks(input.links);
+    issues.push(...result.issues);
+    links = result.links;
+  }
+
   challenges.sort(compareNewest);
   tools.sort((a, b) => a.name.localeCompare(b.name));
-  return { challenges, tools, about, issues };
+  return { challenges, tools, about, platforms, links, issues };
 }
 
 export function compareNewest(a: Challenge, b: Challenge): number {

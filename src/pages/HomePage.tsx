@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import logo from '../assets/logo-352.png';
 import { ChallengeCard } from '../components/ChallengeCard';
 import cardStyles from '../components/Card.module.css';
-import { challenges, tools } from '../lib/content/load';
+import { challenges, platforms, tools } from '../lib/content/load';
 import { plural } from '../lib/format';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 import { siteConfig } from '../site.config';
@@ -37,6 +37,27 @@ export function HomePage() {
           </p>
         </div>
       </section>
+
+      {platforms.length > 0 && (
+        <section aria-labelledby="platforms-heading" className={styles.quick}>
+          <div className={styles.recentHeader}>
+            <h2 id="platforms-heading" className={styles.quickTitle}>
+              Practice platforms
+            </h2>
+            <Link to="/platforms">All platforms</Link>
+          </div>
+          <ul className={styles.quickList}>
+            {platforms.map((p) => (
+              <li key={p.name}>
+                <a href={p.url} target="_blank" rel="noopener noreferrer" className={styles.quickLink}>
+                  {p.name}
+                  <span className="visually-hidden"> (opens in a new tab)</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section aria-labelledby="recent-heading" className={styles.recent}>
         <div className={styles.recentHeader}>

@@ -4,6 +4,8 @@
 //   ?content  the parsed, validated frontmatter (no markdown body), loaded
 //             eagerly by the list pages
 //   ?body     just the markdown body, loaded on demand by a detail page
+// content/platforms.json and content/links.json also use ?content, so they
+// are validated here and reach the browser as checked data.
 // Splitting them keeps every write-up's text out of the main bundle. Parsing
 // happens here at build time, so the YAML parser is never shipped to the browser.
 //
@@ -16,7 +18,7 @@ import { relative, resolve, sep } from 'node:path';
 import type { Plugin, ViteDevServer } from 'vite';
 import { formatIssues, type LoadedEntry } from '../src/lib/content/types.ts';
 import { parseMarkdown } from '../src/lib/content/frontmatter.ts';
-import { loadChallenge, loadPage, loadTool, type ValidationContext } from '../src/lib/content/validate.ts';
+import { loadChallenge, loadLinks, loadPage, loadPlatforms, loadTool, type ValidationContext } from '../src/lib/content/validate.ts';
 import { readContentTree, validateContentTree } from './lib/content-fs.ts';
 
 const QUERY = '?content';
@@ -78,8 +80,14 @@ export function contentPlugin(): Plugin {
       } else if (repoPath === 'content/about.md') {
         const r = loadPage(source, context());
         entry = { item: r.body, issues: r.issues };
+      } else if (repoPath === 'content/platforms.json') {
+        const r = loadPlatforms(source);
+        entry = { item: r.platforms, issues: r.issues };
+      } else if (repoPath === 'content/links.json') {
+        const r = loadLinks(source);
+        entry = { item: r.links, issues: r.issues };
       } else {
-        this.error(`${repoPath}: "?content" only works for challenge write-ups, tool guides, and content/about.md`);
+        this.error(`${repoPath}: "?content" only works for challenge write-ups, tool guides, content/about.md, content/platforms.json, and content/links.json`);
       }
 
       if (entry.issues.length && !server) this.error(formatIssues(entry.issues));
