@@ -250,6 +250,23 @@ The workflow builds with the base path `/<repo>/`. If the site uses a custom dom
 2. Vercel detects Vite. Keep the build command `npm run build` and the output directory `dist`. Do not set `VITE_BASE`; the default `/` is correct.
 3. Deploy. Every push to `main` deploys again, and pull requests get preview links.
 
+### Discord invite (Join page)
+
+The Join page (`/#/join`) gives out the Discord invite only after the visitor passes an [ALTCHA](https://altcha.org) check. ALTCHA is a free, MIT-licensed captcha that runs on our own server: the browser solves a proof-of-work puzzle (a few seconds of hashing), and the Vercel function in `api/discord-invite.ts` checks the answer before it returns the link. The invite code is never in the repository or the site's JavaScript, so scrapers that read the page source find nothing.
+
+Setup on Vercel, under **Settings > Environment Variables**:
+
+| Variable | Value |
+| --- | --- |
+| `DISCORD_INVITE_CODE` | The part after `https://discord.gg/` in the invite link |
+| `ALTCHA_HMAC_SECRET` | A random string of 32 or more characters, such as the output of `openssl rand -hex 32` |
+
+Redeploy after adding them. To change the invite, edit `DISCORD_INVITE_CODE` and redeploy; no code changes.
+
+GitHub Pages cannot run the function. To make the Join page work on the Pages copy too, add a repository variable named `VITE_INVITE_API_URL` (**Settings > Secrets and variables > Actions > Variables**) set to `https://<your-vercel-domain>/api/discord-invite`.
+
+For `npm run dev`, copy `.env.example` to `.env.local` and fill in both values. The dev server answers `/api/discord-invite` itself.
+
 ### Block merges until the check passes
 
 The **Check content** workflow runs on every pull request, but GitHub only blocks a merge if you tell it to:

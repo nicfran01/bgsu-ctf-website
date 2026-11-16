@@ -37,7 +37,7 @@ content/
 - Tool frontmatter: `name`, `category`, `summary`, `platforms` (list) are required; `officialUrl`, `caution`, `tags` are optional.
 - `caution` is 1 or 2 plain sentences for tools that can break the law or university policy when misused (scanners, password crackers, wireless and Active Directory tools). The tool page shows it in a callout above the guide, and the tool card shows a Caution marker. The nmap caution must keep saying not to scan any BGSU network, host, or address, including campus Wi-Fi and residence hall networks.
 - `platforms.json` is a list of objects. `name`, `url` (http/https), `summary` (1 sentence), `category`, and `focus` (list) are required; `cost` and `tags` (list) are optional. Fill in `cost` only when the platform's own site confirms it. Entries show in file order.
-- `links.json` is a list of objects with `name`, `url` (http/https), and `description`, all required. Entries show in file order in the footer; there is no Links page. `description` shows as the link's hover text. An Instagram URL gets an Instagram icon (`ICONS_BY_HOST` in `src/components/Footer.tsx`). Do not add a Discord link.
+- `links.json` is a list of objects with `name`, `url` (http/https), and `description`, all required. Entries show in file order in the footer; there is no Links page. `description` shows as the link's hover text. An Instagram URL gets an Instagram icon (`ICONS_BY_HOST` in `src/components/Footer.tsx`). Do not add a Discord link: the Discord invite is only handed out by the Join page (see below).
 - In both JSON files, unknown fields, duplicate names, and syntax errors fail the build with the entry name and field (for example `[Hack The Box > url]`).
 - The Resources page buttons link to `https://github.com/<owner>/<repo>/tree/<branch>/content/resources/handouts` and `.../slides`, built by `resourceFolderUrl` in `src/lib/github.ts`. The site never reads the files in those folders.
 - Bodies have no `#` heading. The page title comes from frontmatter.
@@ -53,6 +53,13 @@ content/
 - Pages that render markdown (`ChallengeDetailPage`, `ToolDetailPage`, `AboutPage`) are lazy-loaded so list pages stay small.
 - The Tag filter on the Challenges page is a dropdown (`TagDropdown`) so a long tag list stays out of the way. Category and difficulty stay as buttons.
 - Routing is HashRouter. In-page section links are `#/<route>#<heading-id>`; `useHashScroll` handles them.
+
+## Discord invite (Join page)
+
+- `src/pages/JoinPage.tsx` (lazy-loaded) shows an ALTCHA widget (`altcha` package). After the browser solves the proof-of-work challenge, the page POSTs the payload to `api/discord-invite.ts` and shows the invite link the server returns.
+- `api/discord-invite.ts` is the only server code in the repo. It is a Vercel function: `GET` issues a signed challenge, `POST` verifies it with `altcha-lib` and returns `https://discord.gg/<DISCORD_INVITE_CODE>`. `ALTCHA_HMAC_SECRET` signs challenges.
+- Never put the invite code or URL in the repository, `content/`, or anything under `src/`. It lives only in the `DISCORD_INVITE_CODE` environment variable (Vercel settings, or `.env.local` for dev, which git ignores).
+- `scripts/vite-api-plugin.ts` serves the function during `npm run dev`. GitHub Pages builds call the Vercel copy through `VITE_INVITE_API_URL`.
 
 ## Standard write-up structure
 

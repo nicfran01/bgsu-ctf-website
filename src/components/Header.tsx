@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { to: '/platforms', label: 'Platforms' },
   { to: '/resources', label: 'Resources' },
   { to: '/about', label: 'About' },
+  { to: '/join', label: 'Join' },
 ];
 
 export function Header() {

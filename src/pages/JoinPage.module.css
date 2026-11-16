@@ -1,0 +1,40 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  max-width: 32rem;
+  margin-top: var(--space-6);
+}
+
+/* ALTCHA reads these custom properties; map them to the site tokens. */
+.widget {
+  --altcha-color-base: var(--color-surface);
+  --altcha-color-base-content: var(--color-text);
+  --altcha-border-color: var(--color-border-strong);
+  --altcha-border-radius: var(--radius);
+  --altcha-color-primary: var(--color-accent);
+  --altcha-color-primary-content: var(--color-on-accent);
+  --altcha-checkbox-border-color: var(--color-border-strong);
+  --altcha-spinner-color: var(--color-accent);
+  --altcha-max-width: 100%;
+  width: 100%;
+}
+
+.big {
+  justify-content: center;
+  padding: var(--space-4) var(--space-6);
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.note {
+  margin-top: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.error {
+  margin-bottom: var(--space-3);
+  color: var(--color-accent-light);
+}

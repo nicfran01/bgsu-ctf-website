@@ -18,5 +18,5 @@
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true
   },
-  "include": ["vite.config.ts", "scripts", "src/content.config.ts", "src/site.config.ts", "src/lib/content/types.ts", "src/lib/content/frontmatter.ts", "src/lib/content/validate.ts", "src/lib/content/headings.ts", "src/lib/content/paths.ts"]
+  "include": ["vite.config.ts", "scripts", "api", "src/content.config.ts", "src/site.config.ts", "src/lib/content/types.ts", "src/lib/content/frontmatter.ts", "src/lib/content/validate.ts", "src/lib/content/headings.ts", "src/lib/content/paths.ts"]
 }
