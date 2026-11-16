@@ -15,6 +15,8 @@ import { ToolsPage } from './pages/ToolsPage';
 const ChallengeDetailPage = lazy(() => import('./pages/ChallengeDetailPage').then((m) => ({ default: m.ChallengeDetailPage })));
 const ToolDetailPage = lazy(() => import('./pages/ToolDetailPage').then((m) => ({ default: m.ToolDetailPage })));
 const AboutPage = lazy(() => import('./pages/AboutPage').then((m) => ({ default: m.AboutPage })));
+// The Join page carries the ALTCHA widget, so only visitors who open it download it.
+const JoinPage = lazy(() => import('./pages/JoinPage').then((m) => ({ default: m.JoinPage })));
 
 export function App() {
   if (contentIssues.length) return <ContentErrorScreen issues={contentIssues} />;
@@ -31,6 +33,7 @@ export function App() {
             <Route path="platforms" element={<PlatformsPage />} />
             <Route path="resources" element={<ResourcesPage />} />
             <Route path="about" element={<AboutPage />} />
+            <Route path="join" element={<JoinPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>

@@ -39,6 +39,10 @@ jobs:
           # For a custom domain or a <owner>.github.io repository, set a
           # repository variable named VITE_BASE to "/".
           VITE_BASE: ${{ vars.VITE_BASE || format('/{0}/', github.event.repository.name) }}
+          # GitHub Pages cannot run the Discord invite function, so the Join page
+          # calls the Vercel copy. Set a repository variable named
+          # VITE_INVITE_API_URL to https://<vercel-domain>/api/discord-invite.
+          VITE_INVITE_API_URL: ${{ vars.VITE_INVITE_API_URL }}
 
       - uses: actions/configure-pages@v5
 

@@ -1,5 +1,6 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig, loadEnv } from 'vite';
+import { apiDevPlugin } from './scripts/vite-api-plugin.ts';
 import { contentPlugin } from './scripts/vite-content-plugin.ts';
 
 export default defineConfig(({ mode }) => {
@@ -8,6 +9,6 @@ export default defineConfig(({ mode }) => {
     // GitHub Pages serves the site from /<repo>/, Vercel from /. The deploy
     // workflow sets VITE_BASE; everything else gets the default.
     base: env.VITE_BASE || '/',
-    plugins: [react(), contentPlugin()],
+    plugins: [react(), contentPlugin(), apiDevPlugin(env)],
   };
 });

@@ -17,6 +17,8 @@
     "new:tool": "tsx scripts/new-tool.ts"
   },
   "dependencies": {
+    "altcha": "^3.5.0",
+    "altcha-lib": "^2.8.0",
     "fuse.js": "^7.5.0",
     "github-slugger": "^2.0.0",
     "hast-util-to-text": "^4.0.3",
